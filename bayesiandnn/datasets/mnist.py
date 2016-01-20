@@ -13,17 +13,14 @@ BATCH_SIZE = 300
 # load dataset mnist
 
 #load data with path as dataset, could be absolute and relative at the same time. 
-def load_mnist(dataset):
 
-	if not os.path.exists(dataset):
-		raise Exception('file path error')
-
+def _load_data(dataset):
 	dirpath, filename = os.path.split(dataset)
 
 	if dirpath == '' and not os.path.isfile(dataset):
 		new_dirpath = os.path.join(
 			os.path.split(__file__)[0],
-			'../datasets/',
+			'rawdata/',
 			filename
 			)
 
@@ -31,10 +28,16 @@ def load_mnist(dataset):
 			dataset = new_dirpath
 
 
-
 	f = gzip.open(dataset, 'rb')
 	train_set, valid_set, test_set = cPickle.load(f)
+	return train_set, valid_set, test_set
 
+
+
+def load_mnist_theano(dataset):
+	# if not os.path.exists(dataset):
+	# 	raise Exception('file path error')
+	train_set, valid_set, test_set = _load_data(dataset)
 
 	def shared_dataset(data_xy, borrow = True):
 		data_x, data_y = data_xy
@@ -44,7 +47,7 @@ def load_mnist(dataset):
 		return shared_x, T.cast(shared_y, 'int32')
 
 
-	test_set_x, test_set_y = shared_dataset(train_set)
+	train_set_x, train_set_y = shared_dataset(train_set)
 	valid_set_x, valid_set_y = shared_dataset(valid_set)
 	test_set_x, test_set_y = shared_dataset(test_set)
 
@@ -56,9 +59,23 @@ def load_mnist(dataset):
 
 
 
+def load_mnist_ssl(dataset, percent):
+	train_set, valid_set, test_set = _load_data(dataset)
+	
+	ts_x, ts_y = train_set_x
+
+	# balance the dataset such that each class has the same no of input
+	num_classes = np.max(ts_y, axis = 0)
+	num_points = ts_x.shape[0]
+	def balancedataset():
+
+
+
+
+
+
 def load_tidigits():
 	td = gzip.open('tidigits_examples.npz')['tidigits']
-
 
 
 
