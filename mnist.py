@@ -1,3 +1,6 @@
+# author:akash
+# package:bayesiandnn
+
 
 import cPickle, gzip
 import os
@@ -17,10 +20,19 @@ def load_mnist(dataset):
 
 	dirpath, filename = os.path.split(dataset)
 
-	if dirpath == '' and not os.path.isFile 
-		
+	if dirpath == '' and not os.path.isfile(dataset):
+		new_dirpath = os.path.join(
+			os.path.split(__file__)[0],
+			'../datasets/',
+			filename
+			)
 
-	f = gzip.open('datasets/mnist.pkl.gz', 'rb')
+		if os.path.isfile(new_dirpath) or dataset == 'mnist.pkl.gz':
+			dataset = new_dirpath
+
+
+
+	f = gzip.open(dataset, 'rb')
 	train_set, valid_set, test_set = cPickle.load(f)
 
 
@@ -46,8 +58,6 @@ def load_mnist(dataset):
 
 def load_tidigits():
 	td = gzip.open('tidigits_examples.npz')['tidigits']
-
-
 
 
 
