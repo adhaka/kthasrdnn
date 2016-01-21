@@ -77,7 +77,7 @@ def load_mnist_theano(dataset):
 
 
 
-def load_mnist_ssl1(dataset, percent = 0.50):
+def load_mnist_ssl1(dataset, percent = 0.70):
 	train_set, valid_set, test_set = _load_data(dataset)	
 	ts_x, ts_y = train_set
 
@@ -116,19 +116,14 @@ def load_mnist_ssl(dataset, percent = 0.50):
 	train_set, valid_set, test_set = _load_data(dataset)
 	
 	ts_x, ts_y = train_set
-	print ts_x.shape
-	print ts_y.shape
-
 	# balance the dataset such that each class has the same no of input
 	num_cls = np.max(ts_y, axis = 0)
 	num_points = ts_x.shape[0]
 	num_labelled = int(math.ceil(percent * num_points))
 	num_unlabelled = num_points - num_labelled
 	ts_y = ts_y[:, np.newaxis]
-	print ts_y.shape
 
 	xy_comb = np.hstack((ts_x, ts_y))
-	print xy_comb.shape
 	np.random.shuffle(xy_comb)
 	ts_x, ts_y = xy_comb[:,:xy_comb.shape[1] -1], xy_comb[:, xy_comb.shape[1]-1:]
 	idxcnt_cls = math.ceil(num_labelled / num_cls)
