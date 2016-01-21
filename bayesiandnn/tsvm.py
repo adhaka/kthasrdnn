@@ -9,7 +9,7 @@ from datasets import mnist
 # class for implementing transductive SVMs
 class TSVM():
 
-	def __init__(self, C, gamma):
+	def __init__(self, C= 100, gamma= 0.1):
 		self.C = C
 		self.gamma = gamma
 		self.models = []
@@ -18,15 +18,16 @@ class TSVM():
 
 	def train_binary(self, x, y):
 		train_data_svml = svmlfeaturisexy(x, y)
-		model = svmlight.learn(train_data_svml, type='classification', verbosity=0), kernel='rbf', C=self.C, rbf_gamma=self.gamma)
+		model = svmlight.learn(train_data_svml, type='classification', verbosity=0, kernel='rbf', C=self.C, rbf_gamma=self.gamma)
 		svmlight.write_model(model, 'tsvm_mnist.dat')
 
 
 # we use one vs all strategy here ... 
-	def train_multi_onevsall(self, x, y, unlab_x):
-		num_classes = np.amax(y) + 1
-		x_feat = svmlfeaturise(x)
-		unlab_x_feat = svmlfeaturise(unlab_x)
+	def train_multi_onevsall(self, x, y, unlab_x, strategy=1):
+		num_classes = int(np.amax(y) + 1)
+		num_classes = 10
+		x_feat = self.svmlfeaturise(x)
+		unlab_x_feat = self.svmlfeaturise(unlab_x)
 
 		for i in xrange(num_classes):
 			y_feat = (y==i)*2 - 1
@@ -40,7 +41,9 @@ class TSVM():
 				unlab_feats.append((0, unlab_x_feat[j]))
 
 			feats = lab_feats + unlab_feats
+			print "======SVM Model Training started======="
 			model = svmlight.learn(feats, type='classification', verbosity=0, kernel='rbf', C=self.C, rbf_gamma=self.gamma)
+			print "======SVM Model Training terminated======"
 			self.models.append(model)
 		self.trained = True
 
@@ -60,7 +63,7 @@ class TSVM():
 		return y_predicted
 
 
-
+	# predict the accuracy on a test set ...
 	def predictAccuracy(self, x_test, y_test):
 		y_preds = []
 		for i in xrange(y_test):
@@ -70,10 +73,11 @@ class TSVM():
 		return sum(y_preds == y_test) / float(len(y_test))
 
 
+
 	@staticmethod
 	def svmlfeaturise(x):
 		td = []
-		for i in xrange(len(x.shape[0])):
+		for i in xrange(x.shape[0]):
 			ft = []
 			for j in xrange(x.shape[1]):
 				ft_temp = (j + 1, x[i,j])
@@ -102,7 +106,18 @@ class TSVM():
 
 
 def main():
-	[(tr_x, tr_y), (va_x, va_y), (te_x, te_y)] = mnist.load_mnist('mnist.pkl.gz')
+	train_set, valid_set, test_set = mnist.load_mnist_ssl('mnist.pkl.gz')
+	x_tr_lab, y_tr_lab, x_tr_unlab, y_tr_unlab = train_set
+	x_va, y_va = valid_set
+	x_te, y_te = test_set
+	tsvm = TSVM()
+	# x_tr_lab = tsvm.svmlfeaturise(x_tr_lab)
+	# x_tr_unlab = tsvm.svmlfeaturise(x_tr_unlab)
+	x_va, x_te = tsvm.svmlfeaturise(x_va), tsvm.svmlfeaturise(x_te)
+
+	tsvm.train_multi_onevsall(x_tr_lab, y_tr_lab, x_tr_unlab)
+	accuracy = tsvm.predictAccuracy(x_te, y_te)
+
 	print tr_x.shape[0]
 
 

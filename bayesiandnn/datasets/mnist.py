@@ -8,7 +8,7 @@ import numpy as np
 import theano
 import math
 import random
-from Collections import Counter
+from collections import Counter
 from theano import tensor as T
 
 BATCH_SIZE = 300
@@ -34,6 +34,15 @@ def _load_data(dataset):
 	f = gzip.open(dataset, 'rb')
 	train_set, valid_set, test_set = cPickle.load(f)
 	return train_set, valid_set, test_set
+
+
+
+def load_mnist_numpy(dataset):
+	train_set, valid_set, test_set = _load_data(dataset)
+	ts_x, ts_y = train_set
+	va_x, va_y = valid_set
+	te_x, te_y = test_set
+	return [(ts_x, ts_y), (va_x, va_y), (te_x, te_y)] 
 
 
 
@@ -68,13 +77,17 @@ def load_mnist_theano(dataset):
 
 
 
-def load_mnist_ssl(dataset, percent = 0.50):
+def load_mnist_ssl1(dataset, percent = 0.50):
 	train_set, valid_set, test_set = _load_data(dataset)	
-	ts_x, ts_y = train_set_x
+	ts_x, ts_y = train_set
 
 	# balance the dataset such that each class has the same no of input
 	# num_cls = np.max(ts_y, axis = 0)
+	print ts_x.shape
+	print ts_y.shape
+	print max(ts_y), min(ts_y)
 	num_cls = ts_y[0].shape[0]
+
 
 	# number of data points per class.
 
@@ -96,27 +109,34 @@ def load_mnist_ssl(dataset, percent = 0.50):
 		ts_unlab_x[i] = ts_lab_x[i][:, idx[num_labelled:]]
 		ts_unlab_y[i] = ts_lab_y[i][:, idx[num_labelled:]]
 
-	return np.hstack(ts_lab_x), np.hstack(ts_lab_y), np.hstack(ts_unlab_x), np.hstack(ts_unlab_y)
+	return [np.hstack(ts_lab_x), np.hstack(ts_lab_y), np.hstack(ts_unlab_x), np.hstack(ts_unlab_y)], valid_set, test_set
 
 
-# def load_mnist_ssl(dataset, percent = 0.50):
-# 	train_set, valid_set, test_set = _load_data(dataset)
+def load_mnist_ssl(dataset, percent = 0.50):
+	train_set, valid_set, test_set = _load_data(dataset)
 	
-# 	ts_x, ts_y = train_set_x
+	ts_x, ts_y = train_set
+	print ts_x.shape
+	print ts_y.shape
 
-# 	# balance the dataset such that each class has the same no of input
-# 	num_cls = np.max(ts_y, axis = 0)
-# 	num_points = ts_x.shape[0]
-# 	num_labelled = math.ceil(percent * num_points)
-# 	num_unlabelled = num_points - num_labelled
+	# balance the dataset such that each class has the same no of input
+	num_cls = np.max(ts_y, axis = 0)
+	num_points = ts_x.shape[0]
+	num_labelled = int(math.ceil(percent * num_points))
+	num_unlabelled = num_points - num_labelled
+	ts_y = ts_y[:, np.newaxis]
+	print ts_y.shape
 
-# 	xy_comb = np.hstack((ts_x, ts_y), dtype=ts_x.dtype)
-# 	np.random.shuffle(xy_comb)
-# 	ts_x, ts_y = xy_comb[:xy_comb.shape[1] -1], xy_comb[xy_comb.shape[1]-1,:]
-# 	idxcnt_cls = math.ceil(num_labelled / num_cls)
-# 	ts_lab_x, ts_lab_y = ts_x[:num_labelled,:], ts_y[:num_labelled, :]
-# 	ts_unlab_x, ts_unlab_y = ts_x[num_labelled:,:], ts_y[num_labelled, :]
-# 	return ts_unlab_x, ts_lab_y, ts_unlab_x, ts_unlab_y
+	xy_comb = np.hstack((ts_x, ts_y))
+	print xy_comb.shape
+	np.random.shuffle(xy_comb)
+	ts_x, ts_y = xy_comb[:,:xy_comb.shape[1] -1], xy_comb[:, xy_comb.shape[1]-1:]
+	idxcnt_cls = math.ceil(num_labelled / num_cls)
+
+	ts_lab_x = ts_x[:num_labelled,:]
+	ts_lab_y = ts_y[:num_labelled,:]
+	ts_unlab_x, ts_unlab_y = ts_x[num_labelled:,:], ts_y[num_labelled, :]
+	return [ts_unlab_x, ts_lab_y, ts_unlab_x, ts_unlab_y], valid_set, test_set 
 
 
 	def balancedataset(x, y):
