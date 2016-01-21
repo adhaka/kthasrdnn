@@ -70,8 +70,6 @@ class TSVM():
 		return sum(y_preds == y_test) / float(len(y_test))
 
 
-
-
 	@staticmethod
 	def svmlfeaturise(x):
 		td = []
@@ -103,12 +101,9 @@ class TSVM():
 
 
 
-
-
 def main():
 	[(tr_x, tr_y), (va_x, va_y), (te_x, te_y)] = mnist.load_mnist('mnist.pkl.gz')
 	print tr_x.shape[0]
-
 
 
 
