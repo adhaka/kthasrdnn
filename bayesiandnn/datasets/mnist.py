@@ -77,39 +77,27 @@ def load_mnist_theano(dataset):
 
 
 
-def load_mnist_ssl1(dataset, percent = 0.70):
-	train_set, valid_set, test_set = _load_data(dataset)	
-	ts_x, ts_y = train_set
+# def load_mnist_ssl1(dataset, percent = 0.70):
+# 	train_set, valid_set, test_set = _load_data(dataset)	
 
-	# balance the dataset such that each class has the same no of input
-	# num_cls = np.max(ts_y, axis = 0)
-	print ts_x.shape
-	print ts_y.shape
-	print max(ts_y), min(ts_y)
-	num_cls = ts_y[0].shape[0]
+# 	x,y = train_set
+#     n_x = x[0].shape[0]
+#     n_classes = y[0].shape[0]
+#     if n_labeled%n_classes != 0: raise("n_labeled (wished number of labeled samples) not divisible by n_classes (number of classes)")
+#     n_labels_per_class = n_labeled/n_classes
+#     x_labeled = [0]*n_classes
+#     x_unlabeled = [0]*n_classes
+#     y_labeled = [0]*n_classes
+#     y_unlabeled = [0]*n_classes
+#     for i in range(n_classes):
+#         idx = range(x[i].shape[1])
+#         random.shuffle(idx)
+#         x_labeled[i] = x[i][:,idx[:n_labels_per_class]]
+#         y_labeled[i] = y[i][:,idx[:n_labels_per_class]]
+#         x_unlabeled[i] = x[i][:,idx[n_labels_per_class:]]
+#         y_unlabeled[i] = y[i][:,idx[n_labels_per_class:]]
+#     return np.hstack(x_labeled), np.hstack(y_labeled), np.hstack(x_unlabeled), np.hstack(y_unlabeled)
 
-
-	# number of data points per class.
-
-	num_points = ts_x[0].shape[0]
-	num_labelled = math.ceil(percent * num_points)
-	num_unlabelled = num_points - num_labelled
-
-	ts_lab_x = np.zeros(num_cls)
-	ts_lab_y = np.zeros(num_cls)
-	ts_unlab_x = np.zeros(num_cls)
-	ts_unlab_y = np.zeros(num_cls)
-
-
-	for i in range(num_cls):
-		idx = range(ts_lab_x[i].shape[1])
-		np.random.shuffle(idx)
-		ts_lab_x[i] = ts_lab_x[i][:, idx[:, num_labelled]]
-		ts_lab_y[i] = ts_lab_y[i][:, ix[:, num_labelled]]
-		ts_unlab_x[i] = ts_lab_x[i][:, idx[num_labelled:]]
-		ts_unlab_y[i] = ts_lab_y[i][:, idx[num_labelled:]]
-
-	return [np.hstack(ts_lab_x), np.hstack(ts_lab_y), np.hstack(ts_unlab_x), np.hstack(ts_unlab_y)], valid_set, test_set
 
 
 def load_mnist_ssl(dataset, percent = 0.50):
@@ -123,10 +111,11 @@ def load_mnist_ssl(dataset, percent = 0.50):
 	num_unlabelled = num_points - num_labelled
 	ts_y = ts_y[:, np.newaxis]
 
-	xy_comb = np.hstack((ts_x, ts_y))
-	np.random.shuffle(xy_comb)
-	ts_x, ts_y = xy_comb[:,:xy_comb.shape[1] -1], xy_comb[:, xy_comb.shape[1]-1:]
-	idxcnt_cls = math.ceil(num_labelled / num_cls)
+	# xy_comb = np.hstack((ts_x, ts_y))
+	# np.random.shuffle(xy_comb)
+	# ts_x, ts_y = xy_comb[:,:xy_comb.shape[1] -1], xy_comb[:, xy_comb.shape[1]-1:]
+	# print ts_y
+	# idxcnt_cls = math.ceil(num_labelled / num_cls)
 
 	ts_lab_x = ts_x[:num_labelled,:]
 	ts_lab_y = ts_y[:num_labelled,:]

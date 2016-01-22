@@ -19,19 +19,22 @@ def _load_raw_data(datapath):
 			filename
 			)
 
-		if os.path.isfile(new_dirpath) or datapath == 'speechtrain1.pickle.gz':
+		if os.path.isfile(new_dirpath) or datapath == 'train_not_isolated_mfcc.pickle.gz':
 			datapath = new_dirpath
 
 	f = gzip.open(datapath, 'rb')
 	feats, labels = cPickle.load(f)
-	print list(set(labels))
-	# print feats.shape, labels.shape
+
 	return feats, labels
 
 
 
 def load_data_ssl(datapath, percent = 0.70):
 	feats, labels = _load_raw_data(datapath)
+	print feats.shape, labels.shape
+
+	print Counter(labels).most_common()
+	# Counter(labels).most_common()
 	num_cls = np.max(labels, axis=0)
 	num_points = feats.shape[0]
 
@@ -47,12 +50,4 @@ def load_data_ssl(datapath, percent = 0.70):
 	x_unlab, y_unlab = feats[:num_labelled, :], labels[:num_labelled,:]
 
 	return [x_lab, y_lab, x_unlab, y_unlab]
-
-
-
-
-
-
-
-
 

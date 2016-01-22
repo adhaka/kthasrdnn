@@ -9,7 +9,7 @@ from datasets import mnist
 # class for implementing transductive SVMs
 class TSVM():
 
-	def __init__(self, C= 10, gamma= 0.01):
+	def __init__(self, C= 10, gamma= 0.008):
 		self.C = C
 		self.gamma = gamma
 		self.models = []
@@ -22,19 +22,20 @@ class TSVM():
 		svmlight.write_model(model, 'tsvm_mnist.dat')
 
 
+
 # we use one vs all strategy here ... 
 	def train_multi_onevsall(self, x, y, unlab_x, strategy=1):
 
 		num_classes = int(np.max(y) + 1)
-		# num_classes = 10
 		print x.shape, y.shape
-		x, y = x[1:25000:5], y[1:25000:5]
-		unlab_x = unlab_x[1:25000:5]
+		x, y = x[1:25000:2], y[1:25000:2]
+		unlab_x = unlab_x[1:25000:1000]
+
+		print "labelled points number:", x.shape[0]
+		print "unlabelled points number:", unlab_x.shape[0]
 
 		x_feat = self.svmlfeaturise(x)
 		unlab_x_feat = self.svmlfeaturise(unlab_x)
-		print len(x_feat)
-		print len(unlab_x_feat)
 
 		for i in xrange(num_classes):
 			y_feat = (y==i)*2 - 1
@@ -44,9 +45,9 @@ class TSVM():
 			for j in xrange(len(x_feat)):
 				lab_feats.append((y_feat[j], x_feat[j]))
 
-			if unlab_x != None:
-				for j in xrange(len(unlab_x_feat)):
-					unlab_feats.append((0, unlab_x_feat[j]))
+			# if unlab_x != None:
+			# 	for j in xrange(len(unlab_x_feat)):
+			# 		unlab_feats.append((0, unlab_x_feat[j]))
 
 			feats = lab_feats + unlab_feats
 			print "======SVM Model Training started======="
@@ -56,7 +57,7 @@ class TSVM():
 			self.models.append(model)
 		self.trained = True
 
-		# pass
+
 
 	# predict the class of a single data point.
 	def predict(self, x_test):
@@ -71,6 +72,7 @@ class TSVM():
 
 		y_predicted = np.argmax(y_score, axis=0)
 		return y_predicted
+
 
 
 	# predict the accuracy on a test set ...
@@ -88,7 +90,13 @@ class TSVM():
 		return accuracy
 
 
+
+
 	def predictFull(self, x_test, y_test):
+		# hack
+		x_test = x_test[:1000]
+		y_test = y_test[:1000]
+		
 		if self.trained != True:
 			raise Exception("first train a model")
 
@@ -102,6 +110,7 @@ class TSVM():
 			y_preds_mat.append(np.array(svmlight.classify(self.models[i], feats)))
 
 		y_preds = np.argmax(np.vstack(tuple(y_preds_mat)), axis=0)
+		print y_test
 		print y_preds
 		accuracy =  sum([1 for i in range(len(y_test)) if y_preds[i] == y_test[i]]) / float(len(y_test))
 		return accuracy
