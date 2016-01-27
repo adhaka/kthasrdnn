@@ -2,9 +2,12 @@ import numpy as np
 import os
 import cPickle, gzip
 import theano 
-from theano import tensor as T 
-from theano import sharedstreams
+# from theano import theano.tensor as T 
+# from theano import sharedstreams
+import sys
+import struct
 
+# bad hack should be fixed
 
 class PfileIO(object):
 
@@ -23,25 +26,28 @@ class PfileIO(object):
 
 		self.total_frame_num = 0
 		self.partition_num = 0
-        self.frame_per_partition = 0
-        self.end_reading = False
+		self.frame_per_partition = 0
+		self.end_reading = False
+		self._loadData()
 
 
-	def loadData(self):
+	def _loadData(self):
 		dirpath, filename = os.path.split(self.datapath)
 
-		if dirpath == '' and not os.path.isfile(datapath):
+		if dirpath == '' and not os.path.isfile(self.datapath):
 			new_dirpath = os.path.join(
 			os.path.split(__file__)[0],
-			'rawdata/',
+			'../datasets/rawdata/',
 			filename
 			)
+		# dirpath = '/home/akash/masters-thesis/bayesiandnn/bayesiandnn/datasets/timit-fbank.pfile.g'
 
-		if os.path.isfile(new_dirpath) or datapath == 'speechtrain1.pickle.gz':
-			datapath = new_dirpath
+		if os.path.isfile(new_dirpath) or self.datapath == 'speechtrain1.pickle.gz':
+			self.datapath = new_dirpath
 
 
-		self.f = gzip.open(datapath, 'rb')
+		self.f = gzip.open(self.datapath, 'rb')
+		# print self.f
 
 
 
@@ -51,24 +57,27 @@ class PfileIO(object):
 			print "Error:Wrong format"
 			exit(1)
 
-		self.header_size = int(line.split(' ')[-1])
-        while (not line.startswith('-end')):
-            if line.startswith('-num_sentences'):
-                self.num_sentences = int(line.split(' ')[-1])
-            elif line.startswith('-num_frames'):
-                self.total_frame_num = int(line.split(' ')[-1])
-            elif line.startswith('-first_feature_column'):
-                self.feat_start_column = int(line.split(' ')[-1])
-            elif line.startswith('-num_features'):
-                self.original_feat_dim = int(line.split(' ')[-1])
-            elif line.startswith('-first_label_column'):
-                self.label_start_column = int(line.split(' ')[-1])
-            elif line.startswith('-num_labels'):
-                self.num_labels = int(line.split(' ')[-1])
-            line = self.f.readline()
+		# self.header_size = int(line.split(' ')[-1])
+		print self.header_size
 
-        # set a control variable for setting context window width here ...
+		while (not line.startswith('-end')):
+			if line.startswith('-num_sentences'):
+				self.num_sentences = int(line.split(' ')[-1])
+			elif line.startswith('-num_frames'):
+				self.total_frame_num = int(line.split(' ')[-1])
+			elif line.startswith('-first_feature_column'):
+				self.feat_start_column = int(line.split(' ')[-1])
+			elif line.startswith('-num_features'):
+				self.original_feat_dim = int(line.split(' ')[-1])
+			elif line.startswith('-first_label_column'):
+				self.label_start_column = int(line.split(' ')[-1])
+			elif line.startswith('-num_labels'):
+				self.num_labels = int(line.split(' ')[-1])
+			line = self.f.readline()
+			print line
+
 		self.feat_dim = 11 * self.original_feat_dim
+		
 		# self.frame_per_partition = 
 
 
@@ -79,62 +88,65 @@ class PfileIO(object):
 								'offsets': [self.feat_start_column * 4, self.label_start_column * 4]})
 
 		self.f.seek(self.header_size + 4 * (self.label_start_column + self.num_labels) * self.total_frame_num)
-		sentence_offset = struct.unpack(">%di" % (self.num_sentences + 1), self.file_read.read(4 * (self.num_sentences + 1)))
+		sentence_offset = struct.unpack(">%di" % (self.num_sentences + 1), self.f.read(4 * (self.num_sentences + 1)))
 		self.feats = []
 		self.labels = []
+
+
+		self.f.seek(self.header_size)
 
 		#  read the file copied directly from pdnn github... 
 
 		for i in xrange(self.num_sentences):
-            num_frames = sentence_offset[i+1] - sentence_offset[i]
-            if self.f is file:  # Not a compressed file
-                sentence_array = np.fromfile(self.f, self.dtype, num_frames)
-            else:
-                nbytes = 4 * num_frames * (self.label_start_column + self.num_labels)
-                d_tmp = self.f.read(nbytes)
-                sentence_array = np.fromstring(d_tmp, self.dtype, num_frames)
+			num_frames = sentence_offset[i+1] - sentence_offset[i]
+			if self.f is file:  # Not a compressed file
+				sentence_array = np.fromfile(self.f, self.dtype, num_frames)
+			else:
+				nbytes = 4 * num_frames * (self.label_start_column + self.num_labels)
+				d_tmp = self.f.read(nbytes)
+				sentence_array = np.fromstring(d_tmp, self.dtype, num_frames)
 
-            feats = np.asarray(sentence_array['d'])
-            labels = np.asarray(sentence_array['l'])
+			feats = np.asarray(sentence_array['d'])
+			labels = np.asarray(sentence_array['l'])
 
-            # feat_mat, label_vec = preprocess_feature_and_label(feat_mat, label_vec, self.read_opts)
-            
-            if len(self.feats) > 0 and read_frames < self.frame_per_partition:
-                num_frames = min(len(feats), self.frame_per_partition - read_frames)
-                self.feats[-1][read_frames : read_frames + num_frames] = feats[:num_frames]
-                self.labels[-1][read_frames : read_frames + num_frames] = labels[:num_frames]
-                feat_mat = feat_mat[num_frames:]
-                label_vec = label_vec[num_frames:]
-                read_frames += num_frames
-            if len(feat_mat) > 0:
-                read_frames = len(feat_mat)
-                self.feats.append(np.zeros((self.frame_per_partition, self.feat_dim), dtype = theano.config.floatX))
-                self.labels.append(np.zeros(self.frame_per_partition, dtype = np.int32))
-                self.feats[-1][:read_frames] = feat_mat
-                self.labels[-1][:read_frames] = label_vec
-
-
-        # finish reading; close the file
-        self.f.close()
-        self.feats[-1] = self.feats[-1][:read_frames]
-        self.labels[-1] = self.labels[-1][:read_frames]
-
-        self.partition_num = len(self.feats)
-        self.partition_index = 0
+			# feat_mat, label_vec = preprocess_feature_and_label(feat_mat, label_vec, self.read_opts)
+			
+			if len(self.feats) > 0 and read_frames < self.frame_per_partition:
+				num_frames = min(len(feats), self.frame_per_partition - read_frames)
+				self.feats[-1][read_frames : read_frames + num_frames] = feats[:num_frames]
+				self.labels[-1][read_frames : read_frames + num_frames] = labels[:num_frames]
+				feats = feats[num_frames:]
+				labels = labels[num_frames:]
+				read_frames += num_frames
+			if len(feats) > 0:
+				read_frames = len(feats)
+				self.feats.append(np.zeros((self.frame_per_partition, self.feat_dim), dtype = theano.config.floatX))
+				self.labels.append(np.zeros(self.frame_per_partition, dtype = np.int32))
+				self.feats[-1][:read_frames] = feats
+				self.labels[-1][:read_frames] = labels
 
 
+		# finish reading; close the file
+		self.f.close()
+		self.feats[-1] = self.feats[-1][:read_frames]
+		self.labels[-1] = self.labels[-1][:read_frames]
 
-    def load_next_partition(self, shared_xy):
-        feat = self.feats[self.partition_index]
-        label = self.labels[self.partition_index]
+		self.partition_num = len(self.feats)
+		self.partition_index = 0
 
-        shared_x, shared_y = shared_xy
 
-        shared_x.set_value(feat.astype(theano.config.floatX), borrow=True)
-        shared_y.set_value(feat.astype(theano.config.floatX), borrow=True)
 
-        self.cur_frame_num = len(feat)
-        
+	def load_next_partition(self, shared_xy):
+		feat = self.feats[self.partition_index]
+		label = self.labels[self.partition_index]
+
+		shared_x, shared_y = shared_xy
+
+		shared_x.set_value(feat.astype(theano.config.floatX), borrow=True)
+		shared_y.set_value(feat.astype(theano.config.floatX), borrow=True)
+
+		self.cur_frame_num = len(feat)
+		
 
 
 
