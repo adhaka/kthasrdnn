@@ -8,13 +8,13 @@ from theano import sharedstreams
 
 # pickle io - only for theano and for using it in parallel programming
 class PickleIO(object):
-	def __init__():
+	def __init__(self):
 		self.feats = []
 		self.labels = []
 		self.partCounter = 0
 
 
-	def loadData(datapath):
+	def loadData(self, datapath):
 		dirpath, filename = os.path.split(datapath)
 
 		if dirpath == '' and not os.path.isfile(datapath):
@@ -32,13 +32,13 @@ class PickleIO(object):
 		self.feats, self.labels = cPickle.load(f)
 
 
-	def loadDataTheano(datapath):
-		x, y = loadData(datapath)
-		x, y = shared_dataset([x, y])
+	def loadDataTheano(self, datapath):
+		x, y = self.loadData(datapath)
+		x, y = self._shared_dataset([x, y])
 		return x, y
 
 
-	def shared_dataset(data_xy, borrow=True):
+	def _shared_dataset(self, data_xy, borrow=True):
 		data_x, data_y = data_xy
 		shared_x = theano.shared(np.asarray(data_x, dtype=theano.config.floatX), borrow=borrow)
 		shared_y = theano.shared(np.asarray(data_y, dtype=theano.config.floatX), borrow=borrow)
