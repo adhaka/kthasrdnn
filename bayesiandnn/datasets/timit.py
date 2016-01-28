@@ -35,8 +35,11 @@ def _load_raw_data(datapath):
 
 
 if __name__ == '__main__':
-	pfio = PfileIO('tr95.pfile.gz')
-	# pfio.loadData()
-	pfio.readpfileInfo()
-	pfio.readPfile()
+	file_reader = PfileIO('tr95.pfile.gz')
+	file_reader.readpfileInfo()
+	file_reader.readPfile()
+	x, y = file_reader.make_shared()
+	print x.shape, y.shape
+
+	# print x, y
 

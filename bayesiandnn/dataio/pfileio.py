@@ -2,10 +2,12 @@ import numpy as np
 import os
 import cPickle, gzip
 import theano 
-# from theano import theano.tensor as T 
+import theano.tensor as T 
 # from theano import sharedstreams
 import sys
 import struct
+from data_utils import *
+
 
 # bad hack should be fixed
 
@@ -24,6 +26,7 @@ class PfileIO(object):
 		self.label_start_column = 442
 		self.num_labels = 1
 
+		self.partition_value = 1024*1024*60
 		self.total_frame_num = 0
 		self.partition_num = 0
 		self.frame_per_partition = 0
@@ -58,7 +61,6 @@ class PfileIO(object):
 			exit(1)
 
 		# self.header_size = int(line.split(' ')[-1])
-		print self.header_size
 
 		while (not line.startswith('-end')):
 			if line.startswith('-num_sentences'):
@@ -76,12 +78,16 @@ class PfileIO(object):
 			line = self.f.readline()
 			print line
 
+		# this line is a bit fishy, will have to check this .....
+
 		self.feat_dim = 11 * self.original_feat_dim
-		
-		# self.frame_per_partition = 
+		self.frame_per_partition = 1024*1024*600 / (self.feat_dim *4)
+		batch_residual = self.frame_per_partition % 256
+		self.frame_per_partition = self.frame_per_partition - batch_residual
 
 
-	def readPfile(self):
+
+	def readPfile(self, left=5, right =5):
 
 		self.dtype = np.dtype({'names':['d', 'l'],
 								'formats':[('>f', self.original_feat_dim), '>i'],
@@ -91,7 +97,6 @@ class PfileIO(object):
 		sentence_offset = struct.unpack(">%di" % (self.num_sentences + 1), self.f.read(4 * (self.num_sentences + 1)))
 		self.feats = []
 		self.labels = []
-
 
 		self.f.seek(self.header_size)
 
@@ -106,11 +111,14 @@ class PfileIO(object):
 				d_tmp = self.f.read(nbytes)
 				sentence_array = np.fromstring(d_tmp, self.dtype, num_frames)
 
-			feats = np.asarray(sentence_array['d'])
+			# print sentence_array['d']
+			feats = np.asarray(sentence_array['d'], dtype=np.float32)
 			labels = np.asarray(sentence_array['l'])
+			# print feats.shape
+			# print labels
 
-			# feat_mat, label_vec = preprocess_feature_and_label(feat_mat, label_vec, self.read_opts)
-			
+			feats = make_context_feature(feats, left, right)
+
 			if len(self.feats) > 0 and read_frames < self.frame_per_partition:
 				num_frames = min(len(feats), self.frame_per_partition - read_frames)
 				self.feats[-1][read_frames : read_frames + num_frames] = feats[:num_frames]
@@ -136,16 +144,30 @@ class PfileIO(object):
 
 
 
-	def load_next_partition(self, shared_xy):
-		feat = self.feats[self.partition_index]
-		label = self.labels[self.partition_index]
+	# def load_next_partition(self, shared_xy):
+	# 	feat = self.feats[self.partition_index]
+	# 	label = self.labels[self.partition_index]
 
-		shared_x, shared_y = shared_xy
+	# 	shared_x, shared_y = shared_xy
 
-		shared_x.set_value(feat.astype(theano.config.floatX), borrow=True)
-		shared_y.set_value(feat.astype(theano.config.floatX), borrow=True)
+	# 	shared_x.set_value(feat.astype(theano.config.floatX), borrow=True)
+	# 	shared_y.set_value(feat.astype(theano.config.floatX), borrow=True)
 
-		self.cur_frame_num = len(feat)
+	# 	self.cur_frame_num = len(feat)
+
+	def make_shared(self):
+		print len(self.feats), self.feats[0].shape
+		feat = self.feats[0]
+		label = self.labels[0].astype(theano.config.floatX)
+
+		if len(self.feats) > 0:
+			self.shared_feats = theano.shared(feat.astype(theano.config.floatX), borrow=True, name='x')
+			self.shared_labels = theano.shared(label, borrow=True, name='y')
+			self.shared_labels = T.cast(self.shared_labels, 'int32')
+
+		return self.shared_feats, self.shared_labels
+
+
 		
 
 
