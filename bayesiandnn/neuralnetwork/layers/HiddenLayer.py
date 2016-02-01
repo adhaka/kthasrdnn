@@ -7,44 +7,48 @@ import theano.tensor as T
 
 
 class HiddenLayer(object):
-	def __init__(self, rng, n_inputs, n_outputs, activation='tanh', *args, **kwargs):
+
+	def __init__(self, rng, n_inputs, n_outputs, activation='tanh'):
+		# self.w = theano.shared(value=np.asarray(np.uniform((n_inputs, n_outputs), dtype=theano.config.floatX)), name='w', borrow=True)
 		self.w = theano.shared(
-			value=np.asarray(
-				rng.uniform(
-					low=-2*np.sqrt(6. / (n_inputs + n_outputs)),
-					high=2*np.sqrt(6. / (n_inputs + n_outputs)),
-					size=(n_inputs*n_outputs)
-					)),
-					dtype=theano.config.floatX,
-					name='w',
-					borrow=True
-					)
-				
-		
-		self.b = theano.shared(value=np.zeros(1, n_outputs), dtype=theano.config.floatX, name='b', borrow=True)
+            value=np.asarray(
+                rng.uniform(
+                    low=-2*np.sqrt(6. / (n_inputs + n_outputs)),
+                    high=2*np.sqrt(6. / (n_inputs + n_outputs)),
+                    size=(n_inputs, n_outputs)
+                ),
+                dtype=theano.config.floatX),
+            name='w',
+            borrow=True
+        )
+		# self.w = theano.shared(value=np.zeros((n_inputs, n_outputs), dtype=theano.config.floatX), name='w', borrow=True)
+		# self.w = theano.shared(value=0.01 * np.ones((n_inputs, n_outputs), dtype= theano.config.floatX), name='W')
+
+		self.b = theano.shared(value=np.zeros((n_outputs,), dtype=theano.config.floatX), name='b', borrow=True)
 		self.activation = activation
 		self.params = [self.w, self.b]
 
 
+	def  output(self, X):
+		# TODO: activation for ReLu.
 
-	def output(self, X):
-		out = T.dot(X, self.w) + self.b 
-		if activation=='sigmoid':
-			out = 1. / (1 + T.exp(-out))
-		if activation == 'tanh':
-			out = T.tanh(out)
-		if activation == 'relu':
-			out = T.tanh(out)
-
-
-		return out 
-		# return out
+		if self.activation == 'sigmoid':
+			return  1 / (1 + T.exp(-T.dot(X, self.w) - self.b))
+		elif self.activation == 'tanh':
+			return T.tanh(T.dot(X, self.w) + self.b)
 
 
 
-class LogisticRegression(HiddenLayer):
-	def __init__(self, rng, n_inputs, n_outputs, activation='sigmoid', *args, **kwargs):
-		super(LogisticRegression, self).__init__(rng, n_inputs, n_outputs, activation='tanh', *args, **kwargs)
+
+class LogisticRegression(object):
+	def __init__(self, rng, n_inputs, n_outputs, activation='sigmoid'):
+		# super(LogisticRegression, self).__init__(rng, n_inputs, n_outputs, activation='sigmoid')
+		self.w = theano.shared(value=np.zeros((n_inputs, n_outputs), dtype=theano.config.floatX), name='W', borrow=True)
+		self.b = theano.shared(value=np.zeros((n_outputs, ), dtype=theano.config.floatX), name='b', borrow=True)
+		self.activation = activation
+		self.activation = 'tanh'
+		self.params = [self.w, self.b]
+
 
 
 	def output(self, X):
@@ -63,6 +67,7 @@ class LogisticRegression(HiddenLayer):
 	def cost(self, X, y):
 		p1 = self.calcProb(X)
 		c = -T.mean(T.log(p1)[ T.arange(y.shape[0]), y])
+		return c 
 
 
 	def calcAccuracy(self, X, y):

@@ -32,6 +32,7 @@ class PfileIO(object):
 		self.frame_per_partition = 0
 		self.end_reading = False
 		self._loadData()
+		self.featsGenerated = False
 
 
 	def _loadData(self):
@@ -141,6 +142,8 @@ class PfileIO(object):
 
 		self.partition_num = len(self.feats)
 		self.partition_index = 0
+		self.featsGenerated = True
+		# print len(self.feats)
 
 
 
@@ -154,6 +157,16 @@ class PfileIO(object):
 	# 	shared_y.set_value(feat.astype(theano.config.floatX), borrow=True)
 
 	# 	self.cur_frame_num = len(feat)
+
+
+	def generate_features(self):
+		if self.featsGenerated != True:
+			self.readPfile()
+
+		return self.feats[0], self.labels[0]
+
+
+
 
 	def make_shared(self):
 		print len(self.feats), self.feats[0].shape
