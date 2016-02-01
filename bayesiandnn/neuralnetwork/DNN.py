@@ -50,7 +50,14 @@ class DNN(object):
 	def cost(self, X, y):
 		self.forward(X)
 		estimate = self.activations[-1]
-		return self.opLayer.calcAccuracy(X, y)
+		return self.opLayer.cost(X, y)
+
+
+	def calcAccuracy(self, X, y):
+		self.forward(X)
+		estimate = self.activations[-1]
+		return self.opLayer.calcAccuracy(X,y)
+		
 
 
 
