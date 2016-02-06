@@ -23,15 +23,18 @@ class DNN(object):
 		# self.X = X 
 		prev_out = self.n_in
 		self.params = []
+		self.delta_params = []
 
 		for ind, h in enumerate(hidden_layer):
 			HL = HiddenLayer(self.rng, prev_out, h)
 			self.layers.append(HL)
 			prev_out = h
 			self.params += HL.params
+			self.delta_params = self.delta_params + HL.delta_params 
 
 		self.params += self.opLayer.params
-
+		self.delta_params = self.delta_params + self.opLayer.delta_params
+		
 
 
 	def forward(self, X):

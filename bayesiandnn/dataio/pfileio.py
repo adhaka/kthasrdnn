@@ -80,9 +80,10 @@ class PfileIO(object):
 			print line
 
 		# this line is a bit fishy, will have to check this .....
+		# divide the data into number of batches
 
-		self.feat_dim = 11 * self.original_feat_dim
-		self.frame_per_partition = 1024*1024*600 / (self.feat_dim *4)
+		self.feat_dim = self.original_feat_dim
+		self.frame_per_partition = 1024*1024*800 / (self.feat_dim *4)
 		batch_residual = self.frame_per_partition % 256
 		self.frame_per_partition = self.frame_per_partition - batch_residual
 
@@ -118,7 +119,9 @@ class PfileIO(object):
 			# print feats.shape
 			# print labels
 
-			feats = make_context_feature(feats, left, right)
+			# this step is already being done by kaldi scripts for me, the feature is already concatenated by the left and right context frames and so we dont need it here ,
+			# but it can be definitely used for a genreal use-case, uncomment in that case			
+			# feats = make_context_feature(feats, left, right)
 
 			if len(self.feats) > 0 and read_frames < self.frame_per_partition:
 				num_frames = min(len(feats), self.frame_per_partition - read_frames)
@@ -143,6 +146,7 @@ class PfileIO(object):
 		self.partition_num = len(self.feats)
 		self.partition_index = 0
 		self.featsGenerated = True
+		print "number of partitions:"
 		# print len(self.feats)
 
 
@@ -163,7 +167,7 @@ class PfileIO(object):
 		if self.featsGenerated != True:
 			self.readPfile()
 
-		return self.feats[0], self.labels[0]
+		return self.feats, self.labels
 
 
 

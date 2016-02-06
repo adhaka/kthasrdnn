@@ -25,8 +25,14 @@ class HiddenLayer(object):
 		# self.w = theano.shared(value=0.01 * np.ones((n_inputs, n_outputs), dtype= theano.config.floatX), name='W')
 
 		self.b = theano.shared(value=np.zeros((n_outputs,), dtype=theano.config.floatX), name='b', borrow=True)
+
+		self.delta_w = theano.shared(value = np.zeros_like(self.w.get_value(borrow=True)), name = 'delta_w')
+		self.delta_b = theano.shared(value = np.zeros_like(self.b.get_value(borrow=True)), name = 'delta_b')
+		
 		self.activation = activation
 		self.params = [self.w, self.b]
+		self.delta_params = [self.delta_w, self.delta_b]
+
 
 
 	def  output(self, X):
@@ -36,6 +42,9 @@ class HiddenLayer(object):
 			return  1 / (1 + T.exp(-T.dot(X, self.w) - self.b))
 		elif self.activation == 'tanh':
 			return T.tanh(T.dot(X, self.w) + self.b)
+		elif self.activation == 'relu':
+			val = T.dot(X, self.w) + self.b
+			return val*(val > 0)
 
 
 
@@ -45,10 +54,13 @@ class LogisticRegression(object):
 		# super(LogisticRegression, self).__init__(rng, n_inputs, n_outputs, activation='sigmoid')
 		self.w = theano.shared(value=np.zeros((n_inputs, n_outputs), dtype=theano.config.floatX), name='W', borrow=True)
 		self.b = theano.shared(value=np.zeros((n_outputs, ), dtype=theano.config.floatX), name='b', borrow=True)
+		self.delta_w = theano.shared(value = np.zeros_like(self.w.get_value(borrow=True)), name = 'delta_w')
+		self.delta_b = theano.shared(value = np.zeros_like(self.b.get_value(borrow=True)), name = 'delta_b')
+
 		self.activation = activation
 		self.activation = 'tanh'
 		self.params = [self.w, self.b]
-
+		self.delta_params = [self.delta_w, self.delta_b]
 
 
 	def output(self, X):

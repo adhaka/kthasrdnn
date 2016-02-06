@@ -35,12 +35,14 @@ def _load_raw_data(datapath):
 
 
 
-def readTIMIT(format='pfile'):
-	file_reader = PfileIO('tr95.pfile.gz')
+def readTIMIT(datapath='timit-mfcc-mono-tr.pfile.gz', format='pfile'):
+	file_reader = PfileIO(datapath)
 	file_reader.readpfileInfo()
 	file_reader.readPfile()
 	x, y = file_reader.generate_features()
-	print x.shape
+	stats = Counter(y[0])
+	print stats.most_common(100)
+
 	# exit(1)
 	return x, y
 
@@ -59,9 +61,9 @@ def make_sets(x, y):
 	np.random.seed(seed)
 	np.random.shuffle(y)
 
-	n_train_idx = abs(0.70 * indices)
-	n_valid_idx = abs(0.15 * indices)
-	n_test_idx = abs(0.15 * indices)
+	n_train_idx = abs(0.80 * indices)
+	n_valid_idx = abs(0.19 * indices)
+	n_test_idx = abs(0.01 * indices)
 
 	train_set_x, train_set_y = x[:n_train_idx, :], y[:n_train_idx]
 	valid_set_x, valid_set_y = x[n_train_idx:n_train_idx + n_valid_idx, :], y[n_train_idx:n_train_idx + n_valid_idx]
@@ -75,8 +77,8 @@ def make_shared_sets(x, y):
 
 	def shared_dataset(data_xy, borrow = True):
 		data_x, data_y = data_xy
-		shared_x = theano.shared(np.asarray(data_x, dtype= np.float32), borrow=borrow)
-		shared_y = theano.shared(np.asarray(data_y, dtype= np.float32), borrow=borrow)
+		shared_x = theano.shared(np.asarray(data_x, dtype=np.float32), borrow=borrow)
+		shared_y = theano.shared(np.asarray(data_y, dtype=np.float32), borrow=borrow)
 
 		return shared_x, T.cast(shared_y, 'int32')
 
@@ -86,5 +88,26 @@ def make_shared_sets(x, y):
 	print train_set_x.get_value().shape[0]
 
 	return [(train_set_x, train_set_y), (valid_set_x, valid_set_y), (test_set_x, test_set_y)]
+
+
+
+
+def make_shared_partitions(x, y):
+	assert len(x) == len(y)
+
+	shared_x = map(lambda x: theano.shared(np.asarray(x, dtype=np.float32), borrow=True), x)
+	shared_y = map(lambda x: theano.shared(np.asarray(x, dtype=np.float32), borrow=True), y)
+	shared_y = map(lambda x: T.cast(x, 'int32'), shared_y)
+
+	return shared_x, shared_y
+
+
+
+
+
+
+
+
+
 
 

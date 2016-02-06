@@ -53,8 +53,8 @@ def load_mnist_theano(dataset):
 
 	def shared_dataset(data_xy, borrow = True):
 		data_x, data_y = data_xy
-		shared_x = theano.shared(np.asarray(data_x, dtype= theano.config.floatX), borrow=borrow)
-		shared_y = theano.shared(np.asarray(data_y, dtype= theano.config.floatX), borrow=borrow)
+		shared_x = theano.shared(np.asarray(data_x, dtype= np.float32), borrow=borrow)
+		shared_y = theano.shared(np.asarray(data_y, dtype= np.float32), borrow=borrow)
 
 		return shared_x, T.cast(shared_y, 'int32')
 
@@ -62,7 +62,7 @@ def load_mnist_theano(dataset):
 	train_set_x, train_set_y = shared_dataset(train_set)
 	valid_set_x, valid_set_y = shared_dataset(valid_set)
 	test_set_x, test_set_y = shared_dataset(test_set)
-
+	print train_set_x.get_value(borrow=True).shape[0]
 
 	batch_size = BATCH_SIZE
 
