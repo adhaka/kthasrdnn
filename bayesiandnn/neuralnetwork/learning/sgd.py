@@ -12,7 +12,6 @@ from collections import OrderedDict
 #  function to perform stochastic gradient descent
 
 def bsgd(nn, data, name='sgd', lr=0.025, alpha=0.3, batch_size=500, epochs = 400):
-	# train_set is a list of trainingsets divided into partitions
 
 	train_set_x, train_set_y = data[0]
 	valid_set_x, valid_set_y = data[1]

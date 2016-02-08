@@ -5,18 +5,23 @@ import theano.tensor as T
 from theano.tensor.shared_randomstreams import RandomStreams 
 
 
+# in autoencoders, each layer is greedily trained with respect to the final output.
 
 class DAE(object):
-	def __init__(self, numpy_rng, theano_rng, input=None, n_inputs, n_hiddens, corruption=0.30, config=1):
+	def __init__(self, numpy_rng, theano_rng, inp, n_inputs, n_hiddens, w, bhid=None, bvis=None, corruption=0.30, config=1):
 		self.rng = rng
 		self.n_inputs = n_inputs
 		self.n_hiddens = n_hiddens
 		self.corruption = corruption
+		self.w = w
+		self.bhid = bhid
+		self.bvis = bvis
 
 		if not theano_rng:
 			theano_rng = RandomStreams(numpy_rng.randint( 2 ** 30))
 
-		self.w = theano.shared(
+		if not w:
+			self.w = theano.shared(
 			value=np.asarray(
 				rng.uniform(
 					low =-4*np.sqrt(6. / (n_inputs + n_hiddens)),
@@ -29,8 +34,12 @@ class DAE(object):
 					borrow=True
 			)
 
-		self.bhid = theano.shared(value=np.zeros((n_hiddens,), dtype=theano.config.floatX), name='bhid', borrow=True)
-		self.bvis = theano.shared(value=np.zeros((n_inputs, ), dtype=theano.config.floatX), name='bvis', borrow=True)
+
+		if not bhid:
+			self.bhid = theano.shared(value=np.zeros(n_hiddens, dtype=theano.config.floatX), name='bhid', borrow=True)
+		
+		if not bvis:
+			self.bvis = theano.shared(value=np.zeros(n_inputs, dtype=theano.config.floatX), name='bvis', borrow=True)
 
 		self.w_prime = self.w.T
 
@@ -41,17 +50,17 @@ class DAE(object):
 		self.theano_rng = theano_rng
 
 		
-		if input == None:
+		if inp == None:
 			x = T.dmatrix('x')
 			self.x = x
 		else:
-			self.x = input
+			self.x = inp
 
 
 
 
 	def make_corruption(self, X):
-
+		pass
 
 
 	def get_hidden_output(self, X):

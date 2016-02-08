@@ -18,6 +18,7 @@ class DNN(object):
 		self.n_in = n_in
 		self.rng = rng
 		self.layers = []
+		self.x = None
 
 		self.opLayer = LogisticRegression(rng, hidden_layer[-1], n_out)
 		# self.X = X 
@@ -34,12 +35,13 @@ class DNN(object):
 
 		self.params += self.opLayer.params
 		self.delta_params = self.delta_params + self.opLayer.delta_params
-		
+
 
 
 	def forward(self, X):
 		# self.activations = []
 		inp = X
+		self.x = X
 		activations = [X]
 		for i, l in enumerate(self.layers):
 			act = l.output(inp)

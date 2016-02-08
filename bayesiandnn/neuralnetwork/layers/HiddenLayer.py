@@ -13,8 +13,8 @@ class HiddenLayer(object):
 		self.w = theano.shared(
             value=np.asarray(
                 rng.uniform(
-                    low=-2*np.sqrt(6. / (n_inputs + n_outputs)),
-                    high=2*np.sqrt(6. / (n_inputs + n_outputs)),
+                    low=-4*np.sqrt(6. / (n_inputs + n_outputs)),
+                    high=4*np.sqrt(6. / (n_inputs + n_outputs)),
                     size=(n_inputs, n_outputs)
                 ),
                 dtype=theano.config.floatX),
@@ -39,12 +39,14 @@ class HiddenLayer(object):
 		# TODO: activation for ReLu.
 
 		if self.activation == 'sigmoid':
-			return  1 / (1 + T.exp(-T.dot(X, self.w) - self.b))
+			self.output = 1 / (1 + T.exp(-T.dot(X, self.w) - self.b)) 
 		elif self.activation == 'tanh':
-			return T.tanh(T.dot(X, self.w) + self.b)
+			self.output = T.tanh(T.dot(X, self.w) + self.b)
 		elif self.activation == 'relu':
 			val = T.dot(X, self.w) + self.b
-			return val*(val > 0)
+			self.output = val*(val > 0)
+		
+		return self.output
 
 
 
