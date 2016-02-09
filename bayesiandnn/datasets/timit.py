@@ -35,15 +35,18 @@ def _load_raw_data(datapath):
 
 
 
-def readTIMIT(datapath='timit-mfcc-mono-tr.pfile.gz', format='pfile'):
+def readTIMIT(datapath='timit-mfcc-mono-tr.pfile.gz', format='pfile', shared=False):
 	file_reader = PfileIO(datapath)
 	file_reader.readpfileInfo()
 	file_reader.readPfile()
 	x, y = file_reader.generate_features()
-	stats = Counter(y[0])
+	stats = Counter(y)
 	print stats.most_common(100)
 
 	# exit(1)
+	if shared == True:
+		x, y = shared_dataset((x, y))
+	
 	return x, y
 
 
@@ -62,8 +65,8 @@ def make_sets(x, y):
 	np.random.shuffle(y)
 
 	n_train_idx = abs(0.80 * indices)
-	n_valid_idx = abs(0.19 * indices)
-	n_test_idx = abs(0.01 * indices)
+	n_valid_idx = abs(0.15 * indices)
+	n_test_idx = abs(0.05 * indices)
 
 	train_set_x, train_set_y = x[:n_train_idx, :], y[:n_train_idx]
 	valid_set_x, valid_set_y = x[n_train_idx:n_train_idx + n_valid_idx, :], y[n_train_idx:n_train_idx + n_valid_idx]
@@ -85,9 +88,17 @@ def make_shared_sets(x, y):
 	train_set_x, train_set_y = shared_dataset(train_set)
 	valid_set_x, valid_set_y = shared_dataset(valid_set)
 	test_set_x, test_set_y = shared_dataset(test_set)
-	print train_set_x.get_value().shape[0]
-
+	# print train_set_x.get_value().shape[0]
 	return [(train_set_x, train_set_y), (valid_set_x, valid_set_y), (test_set_x, test_set_y)]
+
+
+
+def shared_dataset(data_xy, borrow = True):
+	data_x, data_y = data_xy
+	shared_x = theano.shared(np.asarray(data_x, dtype=np.float32), borrow=borrow)
+	shared_y = theano.shared(np.asarray(data_y, dtype=np.float32), borrow=borrow)
+
+	return shared_x, T.cast(shared_y, 'int32')
 
 
 

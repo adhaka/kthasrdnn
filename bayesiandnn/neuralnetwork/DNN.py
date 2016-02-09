@@ -41,7 +41,7 @@ class DNN(object):
 	def forward(self, X):
 		# self.activations = []
 		inp = X
-		self.x = X
+		# self.x = X
 		activations = [X]
 		for i, l in enumerate(self.layers):
 			act = l.output(inp)

@@ -39,14 +39,14 @@ class HiddenLayer(object):
 		# TODO: activation for ReLu.
 
 		if self.activation == 'sigmoid':
-			self.output = 1 / (1 + T.exp(-T.dot(X, self.w) - self.b)) 
+			return 1 / (1 + T.exp(-T.dot(X, self.w) - self.b)) 
 		elif self.activation == 'tanh':
-			self.output = T.tanh(T.dot(X, self.w) + self.b)
+			return T.tanh(T.dot(X, self.w) + self.b)
 		elif self.activation == 'relu':
 			val = T.dot(X, self.w) + self.b
-			self.output = val*(val > 0)
-		
-		return self.output
+			return val*(val > 0)
+
+		# return self.output
 
 
 

@@ -42,18 +42,15 @@ class SdA(object):
 
 
 
+
 	def pretraining_functions(self, train_set_x, batch_size):
 
-		index = T.dscalar('index')
+		index = T.ivector('index')
 		learning_rate = T.dscalar('learning_rate')
 		corruption_level = T.dscalar('corruption_level')
 		momentum = T.dscalar('momentum')
 		num_samples = train_set_x.get_value().shape[1]
 		num_batches = num_samples / batch_size
-
-		batch_begin = index*batch_size
-		batch_end = (index + 1) * batch_size
-
 
 		pretrain_fns = []
 

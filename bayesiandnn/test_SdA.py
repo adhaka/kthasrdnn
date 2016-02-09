@@ -8,6 +8,8 @@ from theano.tensor.shared_randomstreams import RandomStreams
 
 
 
+BATCH_SIZE = 300
+NUM_EPOCHS = 100
 mnist = mnist.load_mnist_theano('mnist.pkl.gz')
 print mnist
 train_set_x, train_set_y = mnist[0]
@@ -24,5 +26,22 @@ theano_rng = RandomStreams(numpy_rng.randint( 2**30 ))
 nn_ae = DNN(numpy_rng, [1024, 1024], 784, 10)
 ae1 = SdA(train_set_x, numpy_rng, theano_rng, [1024, 1024], nn_ae)
 
-pretrain_fns = ae1.pretraining_functions()
+pretrain_fns = ae1.pretraining_functions(train_set_x, BATCH_SIZE)
+
+num_samples = train_set_x.get_value(borrow=True).shape[1]
+num_batches = num_samples / BATCH_SIZE
+indices = np.arange(num_samples, dtype=np.dtype('int32'))
+
+# layer-wise pretraining
+
+for i in xrange(SdA.da_layers):
+	for epoch in xrange(NUM_EPOCHS):
+		c = []
+		for i in xrange(num_batches):
+			index = indices[i*BATCH_SIZE:(i+1)*BATCH_SIZE] 
+			c.append(pretrain_fns[i](index=batch_index))
+
+		print "pretraining reconstruction error:",i, epoch, np.mean(c)
+
+
 
