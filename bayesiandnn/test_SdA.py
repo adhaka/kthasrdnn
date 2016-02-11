@@ -1,16 +1,18 @@
 import numpy as np 
 from neuralnetwork.learning.sgd import *
 from neuralnetwork.DNN import DNN 
-from neuralnetwork.AutoEncoder import SdA
+from neuralnetwork.SdA import SdA
 from datasets import mnist
 from datasets import timit
 from theano.tensor.shared_randomstreams import RandomStreams 
 
 
 
-BATCH_SIZE = 300
-NUM_EPOCHS = 100
+BATCH_SIZE = 400
+NUM_EPOCHS = 200
 mnist = mnist.load_mnist_theano('mnist.pkl.gz')
+
+
 print mnist
 train_set_x, train_set_y = mnist[0]
 valid_set_x, valid_set_y = mnist[1]
@@ -24,7 +26,7 @@ theano_rng = RandomStreams(numpy_rng.randint( 2**30 ))
 # configuration for mnist
 
 nn_ae = DNN(numpy_rng, [1024, 1024], 784, 10)
-ae1 = SdA(train_set_x, numpy_rng, theano_rng, [1024, 1024], nn_ae)
+ae1 = SdA(train_set_x, numpy_rng, theano_rng, [500, 500], nn_ae)
 
 pretrain_fns = ae1.pretraining_functions(train_set_x, BATCH_SIZE)
 
@@ -34,12 +36,12 @@ indices = np.arange(num_samples, dtype=np.dtype('int32'))
 
 # layer-wise pretraining
 
-for i in xrange(SdA.da_layers):
+for i in xrange(len(ae1.da_layers)):
 	for epoch in xrange(NUM_EPOCHS):
 		c = []
 		for i in xrange(num_batches):
 			index = indices[i*BATCH_SIZE:(i+1)*BATCH_SIZE] 
-			c.append(pretrain_fns[i](index=batch_index))
+			c.append(pretrain_fns[i](index=index))
 
 		print "pretraining reconstruction error:",i, epoch, np.mean(c)
 

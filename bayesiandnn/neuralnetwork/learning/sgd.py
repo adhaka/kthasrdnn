@@ -11,7 +11,7 @@ from collections import OrderedDict
 
 #  function to perform stochastic gradient descent
 
-def bsgd(nn, data, name='sgd', lr=0.025, alpha=0.4, batch_size=600, epochs = 400):
+def bsgd(nn, data, name='sgd', lr=0.035, alpha=0.3, batch_size=500, epochs = 400):
 
 	train_set_x, train_set_y = data[0]
 	valid_set_x, valid_set_y = data[1]
@@ -56,7 +56,7 @@ def bsgd(nn, data, name='sgd', lr=0.025, alpha=0.4, batch_size=600, epochs = 400
 	for n in xrange(epochs):
 		np.random.shuffle(indices)
 		for i in xrange(num_batches):
-			batch = indices[i*num_batches: (i+1)*batch_size]
+			batch = indices[i*batch_size: (i+1)*batch_size]
 			batch_sgd_train(batch)
 
 		print "validation accuracy:",  batch_sgd_valid()

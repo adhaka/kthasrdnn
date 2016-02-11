@@ -16,6 +16,7 @@ class DNN(object):
 		self.rng = rng
 		self.params = []
 		self.n_in = n_in
+		self.n_out = n_out
 		self.rng = rng
 		self.layers = []
 		self.x = None
