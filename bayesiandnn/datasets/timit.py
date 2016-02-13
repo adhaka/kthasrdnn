@@ -62,9 +62,9 @@ def make_sets(x, y):
 	np.random.seed(seed)
 	np.random.shuffle(y)
 
-	n_train_idx = abs(0.80 * indices)
-	n_valid_idx = abs(0.15 * indices)
-	n_test_idx = abs(0.05 * indices)
+	n_train_idx = abs(0.85 * indices)
+	n_valid_idx = abs(0.11 * indices)
+	n_test_idx = abs(0.04 * indices)
 
 	train_set_x, train_set_y = x[:n_train_idx, :], y[:n_train_idx]
 	valid_set_x, valid_set_y = x[n_train_idx:n_train_idx + n_valid_idx, :], y[n_train_idx:n_train_idx + n_valid_idx]

@@ -81,16 +81,15 @@ class PfileIO(object):
 
 		# this line is a bit fishy, will have to check this .....
 		# divide the data into number of batches
-
 		self.feat_dim = self.original_feat_dim
-		self.frame_per_partition = 1024*1024*500 / (self.feat_dim *4)
+		self.frame_per_partition = 1024*1024*600 / (self.feat_dim *4)
 		batch_residual = self.frame_per_partition % 256
 		self.frame_per_partition = self.frame_per_partition - batch_residual
 
 
 
-	def readPfile(self, left=5, right =5):
 
+	def readPfile(self, left=5, right =5):
 		self.dtype = np.dtype({'names':['d', 'l'],
 								'formats':[('>f', self.original_feat_dim), '>i'],
 								'offsets': [self.feat_start_column * 4, self.label_start_column * 4]})
@@ -163,12 +162,15 @@ class PfileIO(object):
 	# 	self.cur_frame_num = len(feat)
 
 
-	def generate_features(self):
+
+	def generate_features(self, listify=True):
 		if self.featsGenerated != True:
 			self.readPfile()
 
+		if listify:
+			return self.feats, self.labels
+
 		return self.feats[0], self.labels[0]
-		return self.feats, self.labels
 
 
 
