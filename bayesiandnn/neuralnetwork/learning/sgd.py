@@ -11,7 +11,7 @@ from collections import OrderedDict
 
 #  function to perform stochastic gradient descent
 
-def bsgd(nn, data, name='sgd', lr=0.035, alpha=0.3, batch_size=500, epochs = 400):
+def bsgd(nn, data, name='sgd', lr=0.022, alpha=0.3, batch_size=400, epochs = 10):
 
 	train_set_x, train_set_y = data[0]
 	valid_set_x, valid_set_y = data[1]
@@ -59,7 +59,8 @@ def bsgd(nn, data, name='sgd', lr=0.035, alpha=0.3, batch_size=500, epochs = 400
 			batch = indices[i*batch_size: (i+1)*batch_size]
 			batch_sgd_train(batch)
 
-		print "validation accuracy:",  batch_sgd_valid()
+		print "epoch:", n,  "	validation accuracy:",  batch_sgd_valid()
+
 
 
 	print batch_sgd_test()
@@ -69,7 +70,7 @@ def bsgd(nn, data, name='sgd', lr=0.035, alpha=0.3, batch_size=500, epochs = 400
 
 
 
-def bsgd_partition(nn, data, name='sgd', lr=0.025, alpha=0.3, batch_size=500, epochs = 400):
+def bsgd_partition(nn, data, name='sgd', lr=0.025, alpha=0.3, batch_size=500, epochs = 10):
 	# train_set is a list of trainingsets divided into partitions
 
 	train_set_x, train_set_y = data[0]
@@ -80,6 +81,7 @@ def bsgd_partition(nn, data, name='sgd', lr=0.025, alpha=0.3, batch_size=500, ep
 	num_partitions = len(train_set_x)
 	print "number of partitions:", num_partitions
 	train_set_x = np.asarray(train_set_x)
+
 	num_samples = train_set_x[0].get_value(borrow=True).shape[0] 
 	num_batches = num_samples / batch_size 
 
@@ -109,7 +111,7 @@ def bsgd_partition(nn, data, name='sgd', lr=0.025, alpha=0.3, batch_size=500, ep
 	ii = T.ivector('ii')
 
 
-	batch_sgd_train = theano.function(inputs=[ii, index], outputs=[cost, accuracy], updates=updates, givens={x: train_set_x[ii][index], y:train_set_y[ii][index]})
+	batch_sgd_train = theano.function(inputs=[ii, index], outputs=[cost, accuracy], updates=updates, givens={x: train_set_x[index], y:train_set_y[index]})
 
 	batch_sgd_valid = theano.function(inputs=[], outputs=nn.calcAccuracy(x, y), givens={x: valid_set_x, y:valid_set_y})
 
