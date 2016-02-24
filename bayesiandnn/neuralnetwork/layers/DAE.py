@@ -8,7 +8,7 @@ from theano.tensor.shared_randomstreams import RandomStreams
 # in autoencoders, each layer is greedily trained with respect to the final output.
 
 class DAE(object):
-	def __init__(self, numpy_rng, theano_rng, inp, n_inputs, n_hiddens, w, bhid=None, bvis=None, corruption=0.30, config=1):
+	def __init__(self, numpy_rng, theano_rng, inp, n_inputs, n_hiddens, w, bhid=None, bvis=None, corruption=0.40, config=1):
 		self.numpy_rng = numpy_rng
 		self.n_inputs = n_inputs
 		self.n_hiddens = n_hiddens
@@ -29,7 +29,7 @@ class DAE(object):
 			value=np.asarray(
 				numpy_rng.uniform(
 					low =-4*np.sqrt(6. / (n_inputs + n_hiddens)),
-					high=-4*np.sqrt(6. / (n_inputs + n_hiddens)),
+					high= 4*np.sqrt(6. / (n_inputs + n_hiddens)),
 					size=(n_inputs, n_hiddens) 
 					),
 					dtype=theano.config.floatX

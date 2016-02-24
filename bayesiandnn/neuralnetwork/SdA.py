@@ -59,7 +59,7 @@ class SdA(object):
 		index = T.ivector('index')
 		learning_rate = T.scalar('learning_rate')
 		# corruption_level = T.scalar('corruption_level')
-		momentum = T.scalar('momentum')
+		momentum = T.scalar('momentum')	
 
 		num_samples = train_set_x.get_value().shape[1]
 		num_batches = num_samples / batch_size
