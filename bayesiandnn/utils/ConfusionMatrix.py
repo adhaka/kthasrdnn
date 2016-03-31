@@ -1,6 +1,7 @@
 # some basic util and helper functions 
 #  some inplementation based on DTU SUmmer school on Deep Learning .....
-
+import numpy as np 
+import os, sys
 
 class ConfusionMatrix(object):
 
@@ -54,11 +55,64 @@ class ConfusionMatrix(object):
 		if predictions == None or actuals == None:
 			self.calculateMatrix(predictions, actuals)
 
-		tp_per_row = np.asarray(np.diag(self.mat).flatten())
+		tp_per_class = np.asarray(np.diag(self.matrix).flatten())
+		fn_per_class = np.sum(self.matrix, axis=1).flatten() - tp_per_class
+		fp_per_class = np.sum(self.matrix, axis=0).flatten() - tp_per_class
+		tn_per_class = np.asarray([np.sum(self.matrix)] * self.classes_num) - fp_per_class - fn_per_class - tp_per_class
+		# tn_per_class =  
+
+		return tp_per_class, fn_per_class, fp_per_class, tn_per_class
+
+
 		# fn_per_row = 
-		true_positives = np.trace(self.matrix)
+		# true_positives = np.trace(self.matrix)
 		# false_positives = 
-		
+
+	def accuracy(self):
+		tp, fn, fp, fn = self.get_error_rates()
+		tp = np.sum(tp)
+		self.num_samples = np.sum(np.asarray(self.mat.flatten()))
+		return tp / float(self.num_samples)
+
+
+	def recall(self):
+		tp, fn, fp, tn = self.get_error_rates()
+		return tp / float(tp + fn)
+
+	def specificity(self):
+		tp, fn, fp, tn = self.get_error_rates()
+		result = tn / (tn + fp)
+		return result 
+
+	def precision(self):
+		tp, fn, fp, tn = self.get_error_rates()
+		return tp / float(tp + fp)
+
+	def false_positive_rate(self):
+		tp, fn, fp, tn = self.get_error_rates()
+		result = fp / float(fp + tp)
+		return result
+
+
+	def negative_error_rate(self):
+		tp, fn, fp, tn = self.get_error_rates()
+		result = fn / float(fn + tn)
+		return result
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
