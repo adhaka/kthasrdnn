@@ -13,22 +13,21 @@ from theano.tensor.shared_randomstreams import RandomStreams
 #  but if we have both of them, then the dnn configuration will take precedence.
 
 class SdA(object):
-	def __init__(self, inp, numpy_rng, theano_rng=None, hidden_layer=None, dnn=None):
+	def __init__(self, inp, numpy_rng, theano_rng=None, hidden_layer=None, dnn=None, activations_layers=None):
 		self.numpy_rng = numpy_rng
 		self.hidden_layer = hidden_layer
 		self.theano_rng = theano_rng
 		self.hidden_layer_size = len(self.hidden_layer)
 
-
 		if not theano_rng:
 			theano_rng = RandomStreams(numpy_rng.randint( 2 ** 30))
 		self.da_layers = []
+		self.params = []
 
 		self.x = T.matrix('x')
 		self.x = inp
 
 		if dnn:
-
 			if dnn.x:
 				self.x = dnn.x
 			
@@ -38,20 +37,20 @@ class SdA(object):
 
 		self.hidden_layer_size = len(self.hidden_layer)
 		layer_x = self.x
-		print self.x
 		n_input = layer_x.get_value().shape[1]
 
 		for i, l in enumerate(hidden_layer):
 			if i > 0:
 				layer_x = dnn.layers[i-1].output(layer_x)
 				n_input = self.hidden_layer[i-1]
+			
+			activation_fn = activations_layers[i]
 
 			w = dnn.layers[i].w
 			bhid = dnn.layers[i].b
-			da = DAE(numpy_rng, theano_rng, layer_x, n_input, l, w, bhid)
+			da = DAE(numpy_rng=numpy_rng, theano_rng=theano_rng, inp=layer_x, n_inputs=n_input, n_hiddens=l, w=w, bhid=bhid, activation=activation_fn)
 			self.da_layers.append(da)
-
-
+			self.params = self.params + da.params
 
 
 
@@ -60,6 +59,7 @@ class SdA(object):
 		learning_rate = T.scalar('learning_rate')
 		# corruption_level = T.scalar('corruption_level')
 		momentum = T.scalar('momentum')	
+		
 
 		num_samples = train_set_x.get_value().shape[1]
 		num_batches = num_samples / batch_size
@@ -72,5 +72,6 @@ class SdA(object):
 			cost, updates = da.get_cost_updates()
 			pt_fn = theano.function(inputs=[index], updates=updates, outputs=[cost], givens={self.x:train_set_x[index]})
 			pretrain_fns.append(pt_fn)
+
 
 		return pretrain_fns
