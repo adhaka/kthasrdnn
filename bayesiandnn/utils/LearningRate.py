@@ -2,7 +2,6 @@
 import numpy as  np 
 import math, random 
 import theano
-import theano.Tensor as T 
 
 
 class Learning_Rate(object):
@@ -37,7 +36,7 @@ class Learning_Rate(object):
 class Learning_Rate_Constant(Learning_Rate):
 	def __init__(self, tolerance=0.1, max_epochs=50):
 		super(Learning_Rate_Constant, self).__init__()
-		self.errors = [0]
+		self.errors = [0.]
 		self.delta_errors = []
 		self.max_epochs = max_epochs
 		self.tolerance = tolerance
@@ -45,7 +44,8 @@ class Learning_Rate_Constant(Learning_Rate):
 
 	def updateError(self, error):
 		self.errors.append(abs(error))
-		self.delta_errors.append(abs(self.errors[-1] - self.errors[-2])
+		self.delta_errors.append(abs(self.errors[-1] - self.errors[-2]))
+
 
 
 	def _checkEarlyStopping(self):
@@ -58,7 +58,7 @@ class Learning_Rate_Constant(Learning_Rate):
 
 
 
-	def getRate(self):
+	def updateRate(self):
 		self.epochs += 1
 		self._checkEarlyStopping()
 		if self.epochs >= 50 or self.stop == True:
@@ -67,11 +67,14 @@ class Learning_Rate_Constant(Learning_Rate):
 
 		return self.rate
 
+	def getRate(self):
+		return self.rate
+
 
 
 # this implements learning rate scheme with linear_decay
 class Learning_Rate_Linear_Decay(Learning_Rate):
-	def __init__(self, start_rate=0.06, end_rate=0.005, decay_rate=0.5, min_epochs_start_decay=10, min_error_diff=0.04, tolerance=0.2):
+	def __init__(self, start_rate=0.06, end_rate=0.005, decay_rate=0.5, min_epochs_start_decay=10, min_error_diff=0.001, tolerance=0.2):
 		super(Learning_Rate_Linear_Decay, self).__init__(start_rate)
 		self.end_rate = end_rate
 		self.rate = start_rate
@@ -79,36 +82,43 @@ class Learning_Rate_Linear_Decay(Learning_Rate):
 		self.tolerance = tolerance
 		self.min_epochs_start_decay = min_epochs_start_decay
 		self.min_error_diff = min_error_diff
+		self.errors = [0.]
+		self.delta_errors = []
 		self.stop = False
 
 
 	def updateError(self, error):
 		self.errors.append(abs(error))
-		self.delta_errors.append(abs(self.errors[-1] - self.errors[-2])
+		self.delta_errors.append(abs(self.errors[-1] - self.errors[-2]))
 
 
-	def checkEarlyStopping(self):
-		if self.epochs <= 3:
+	def _checkEarlyStopping(self):
+		if self.epochs <= self.min_epochs_start_decay:
 			return 
 		val1 = abs(self.delta_errors[-1])
 		val2 = abs(self.delta_errors[-2])
-		if self.delta_errors[-1] < self.min_error_diff:
+		if (self.delta_errors[-1] < self.min_error_diff):
 			self.stop = True
 			self.rate = 0.0
 
 		if val1 < round(self.tolerance*val2, 4) and self.epochs >= self.min_epochs_start_decay:
-			self.rate = decay_rate*self.rate
+			self.rate = self.decay_rate*self.rate
 
 
-	def getRate(self):
+	def updateRate(self):
 		self.epochs += 1
+		# self.updateError(error)
 		self._checkEarlyStopping()
 		
 		# one final check
-		if self.stop = True:
+		if self.stop == True:
 			self.rate = 0.0
 
 		return self.rate 
+
+
+	def getRate(self):
+		return self.rate
 
 
 # Learning Rate optimised by a GP coming soon here .... :)
