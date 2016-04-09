@@ -25,8 +25,8 @@ theano_rng = RandomStreams(numpy_rng.randint( 2**30 ))
 # nn_ae = DNN(numpy_rng, [1024, 1024], 429, 144)
 # configuration for mnist
 
-nn_ae = DNN(numpy_rng, [3096, 3096], 784, 10)
-ae1 = SdA(train_set_x, numpy_rng, theano_rng, [500, 500], nn_ae)
+nn_ae = DNN(numpy_rng, [4096, 4096], 784, 10)
+ae1 = SdA(train_set_x, numpy_rng, theano_rng, [4096, 4096], nn_ae)
 
 pretrain_fns = ae1.pretraining_functions(train_set_x, BATCH_SIZE)
 

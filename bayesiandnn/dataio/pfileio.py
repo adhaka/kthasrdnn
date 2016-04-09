@@ -82,7 +82,7 @@ class PfileIO(object):
 		# this line is a bit fishy, will have to check this .....
 		# divide the data into number of batches
 		self.feat_dim = self.original_feat_dim
-		self.frame_per_partition = 1024*1024*600 / (self.feat_dim *4)
+		self.frame_per_partition = 1024*1024*800 / (self.feat_dim *4)
 		batch_residual = self.frame_per_partition % 256
 		self.frame_per_partition = self.frame_per_partition - batch_residual
 

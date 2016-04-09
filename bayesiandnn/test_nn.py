@@ -12,5 +12,5 @@ print mnist
 
 rng = np.random.RandomState(1111)
 nn = DNN(rng, [3096, 3096], 784, 10)
-bsgd(nn, mnist)
+bsgd(nn, mnist, epochs=40)
 
