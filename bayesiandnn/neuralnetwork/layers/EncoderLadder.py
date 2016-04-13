@@ -7,7 +7,7 @@ from theano.tensor.shared_randomstreams import RandomStreams
 
 class EncoderLadder(object):
 
-	def __init__(self, x_labelled, x_unlabelled, n_outputs, rstream=None, activation='tanh', noise_std=0.0):
+	def __init__(self, x_labelled, x_unlabelled, n_outputs, gamma=1.0, beta=0.0, rstream=None, activation='tanh', noise_std=0.0):
 		
 		self.n_outputs = n_outputs
 		self.rstream = rstream
@@ -35,6 +35,9 @@ class EncoderLadder(object):
         self.x_ul = lambda x:x[N:,:]
         self.split = lambda x: (self.x_l(x), self.x_ul(x))
         self.rstream = RandomStreams(seed=11111)
+        self.d = {}
+        self.d['labelled'] = {}
+        self.d['unlabelled'] = {}
 
         z_pre = T.dot(self.input, self.W) 
         if self.corruption == True:
@@ -48,12 +51,18 @@ class EncoderLadder(object):
 
         #  one more hyper-parameter which controls the amount of nois eto be added to the original input.
         self.noise_std = noise_std
+        self.gamma = theano.shared(value=np.ones_like(n_outputs)*gamma) 
+        self.beta = theano.shared(value=np.zeros_like(n_outputs) + beta)
 
         self.mu_l, self.sigma_l =  self.calculate_moments(self.z_l)
         self.mu_ul, self.sigma_ul = self.calculate_moments(self.z_pre_ul)
 		z_l = self.batch_normalize(self.z_l)
 		z_ul = self.batch_normalize(self.z_ul)
 		z = self.join(z_l, z_ul)
+		self.d['labelled']['mu'] = self.mu_l
+		self.d['unlabelled']['mu'] = self.mu_ul
+		self.d['labelled']['sigma'] = self.sigma_l
+		self.d['unlabelled']['sigma'] = self.sigma_ul
 
 		# @TODO: introduce momentum to reduce the speed of updating of variables, very important ...
 
@@ -64,14 +73,17 @@ class EncoderLadder(object):
 		# final layer activation can only be softmax function ... 
 		if self.layer_type == 'final':
 			activation = 'softmax'
+			activation_fn = "T.nnet" + 'Softmax'
 			h = T.nnet.Softmax(self.gamma* (self.z + self.beta))
+			h = activation_fn(self.z)
 		else:
 			activation = activation
 			activation_fn = "T.nnet." + "relu"
 			h = activation_fn(self.z)
 		self.h = h
-		
-
+		h_l, h_ul = self.split(h)
+		self.d['labelled']['h'] = h_l
+		self.d['unlabelled']['h'] = h_ul		
 
 
 
@@ -79,6 +91,10 @@ class EncoderLadder(object):
     	mu = T.mean(x, axis=1)
     	sigma = T.var(x, axis=1)
     	return mu, sigma
+
+
+    def get_layer_params(self):
+    	return self.h, self.d
 
 
     def batch_normalize(self, z, mean=None, var=None):
