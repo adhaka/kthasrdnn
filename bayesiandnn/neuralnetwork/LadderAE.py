@@ -100,7 +100,17 @@ class LadderAE(object):
 
 
 
-	def decoder_pass()
+	def decoder_pass():
+		decoders = []
+		input_labelled = self.x_labelled
+		input_unlabelled = self.x_unlabelled
+		#  decalring the list of hyper paramsters for each layer here .. to be optimised later ..
+		l1_params = []
+		for l in L:1:-1:
+
+
+
+
 
 
 	def generate_noise(self, x):
