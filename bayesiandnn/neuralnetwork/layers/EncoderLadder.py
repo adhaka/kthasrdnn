@@ -4,11 +4,11 @@ import theano.tensor as T
 from collections import OrderedDict
 from theano.tensor.shared_randomstreams import RandomStreams 
 
-
+# layer could be of three types: 1. first layer 2. hidden layer 3.final softmax layer
 class EncoderLadder(object):
 
-	def __init__(self, x_labelled, x_unlabelled, n_outputs, gamma=1.0, beta=0.0, rstream=None, activation='tanh', noise_std=0.0):
-		
+	def __init__(self, x_labelled, x_unlabelled, n_outputs, gamma=1.0, beta=0.0, rstream=None, activation='tanh', noise_std=0.0, layer_type='hidden'):
+		self.layer_type = layer_type
 		self.n_outputs = n_outputs
 		self.rstream = rstream
 		self.layer_values = {}
@@ -17,6 +17,7 @@ class EncoderLadder(object):
 		self.num_labels = x_labelled.shape[1]
 		self.num_unlabels = x_unlabelled.shape[1]
 		self.samples = self.num_labels + self.num_unlabels
+
 		self.W = theano.shared(
             value=np.asarray(
                 rng.uniform(
@@ -29,6 +30,8 @@ class EncoderLadder(object):
             borrow=True
         )
 
+		
+		self.x_combined = self.join(self.x_labelled, self.x_unlabelled)
         self.layer_values['W'] = self.W
         self.join = lambda x,y: T.concatenate([x, y], axis=0)
         self.x_l = lambda x:x[:N,:]
@@ -39,41 +42,54 @@ class EncoderLadder(object):
         self.d['labelled'] = {}
         self.d['unlabelled'] = {}
 
-        z_pre = T.dot(self.input, self.W) 
-        if self.corruption == True:
-        	z_pre = utils.add_gaussian_noise(z_pre)
+        if self.layer_type == 'input':
+        	self.h = noise_std * self.gen_gaussian_noise(self.x_combined) + self.x_combined 
+        	self.z = self.h
+        else:
+        	self.calculate_Params()
+
+		h_l, h_ul = self.split(self.h)
+		self.d['labelled']['h'] = h_l
+		self.d['unlabelled']['h'] = h_ul	
+
+
+
+	def calculateParams(self, x):
+		z_pre = T.dot(self.x_combined, self.W) 
 
         self.z_pre = z_pre
+        self.z_enc = z_enc
         # concatenating the input to one vector
-        self.x_combined = self.join(self.x_labelled, self.x_unlabelled)
-        self.z_l_pre = z_pre[:self.num_labels,:]
-        self.z_ul_pre = z_pre[self.num_labels:,:]
 
-        #  one more hyper-parameter which controls the amount of nois eto be added to the original input.
+        self.z_pre_l = z_pre[:self.num_labels,:]
+        self.z_pre_ul = z_pre[self.num_labels:,:]
+
+		# @TODO: introduce momentum to reduce the speed of updating of variables, very important ...
+
+        #  one more hyper-parameter which controls the amount of noise to be added to the original input.
         self.noise_std = noise_std
         self.gamma = theano.shared(value=np.ones_like(n_outputs)*gamma) 
         self.beta = theano.shared(value=np.zeros_like(n_outputs) + beta)
 
-        self.mu_l, self.sigma_l =  self.calculate_moments(self.z_l)
-        self.mu_ul, self.sigma_ul = self.calculate_moments(self.z_pre_ul)
-		z_l = self.batch_normalize(self.z_l)
-		z_ul = self.batch_normalize(self.z_ul)
+		self.mu_l, self.sigma_l =  self.calculate_moments(self.z_pre_l)
+		self.mu_ul, self.sigma_ul = self.calculate_moments(self.z_pre_ul)
+		z_l = self.batch_normalize(self.z_pre_l)
+		z_ul = self.batch_normalize(self.z_pre_ul)
 		z = self.join(z_l, z_ul)
 		self.d['labelled']['mu'] = self.mu_l
 		self.d['unlabelled']['mu'] = self.mu_ul
 		self.d['labelled']['sigma'] = self.sigma_l
 		self.d['unlabelled']['sigma'] = self.sigma_ul
-
-		# @TODO: introduce momentum to reduce the speed of updating of variables, very important ...
-
-		if self.noise_std:
-			z = z + gen_gaussian_noise(z)*self.noise_std
+		self.d['labelled']['z_pre'] = z_pre_l
+		self.d['unlabelled']['z_pre'] = z_pre_ul
+		z = z + self.gen_gaussian_noise(z)*self.noise_std
+		self.d['labelled']['z'], self.d['unlabelled']['z'] = self.split(z) 
 
 		self.z = z
 		# final layer activation can only be softmax function ... 
 		if self.layer_type == 'final':
 			activation = 'softmax'
-			activation_fn = "T.nnet" + 'Softmax'
+			activation_fn = "T.nnet." + 'Softmax'
 			h = T.nnet.Softmax(self.gamma* (self.z + self.beta))
 			h = activation_fn(self.z)
 		else:
@@ -81,9 +97,6 @@ class EncoderLadder(object):
 			activation_fn = "T.nnet." + "relu"
 			h = activation_fn(self.z)
 		self.h = h
-		h_l, h_ul = self.split(h)
-		self.d['labelled']['h'] = h_l
-		self.d['unlabelled']['h'] = h_ul		
 
 
 
@@ -115,5 +128,5 @@ class EncoderLadder(object):
 
 
     def update_batch_normalize(self, x):
-
+    	pass
 

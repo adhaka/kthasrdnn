@@ -6,7 +6,8 @@ from theano.tensor.shared_randomstreams import RandomStreams
 
 
 class DecoderLadder(object):
-	def __init__(self, z_denoised_top, z_enc, n_outputs, hyper_params):
+	def __init__(self, z_denoised_top, encoder, encoder_corrupt, n_outputs, hyper_params, top=False):
+		self.top = top
 		self.V = theano.shared(
 			value=np.asarray(
 				rng.uniform(
@@ -19,13 +20,19 @@ class DecoderLadder(object):
 					borrow=True
 					)		
 
+		h_clean, d_clean = encoder.get_layer_params()
+		h_corrupt, d_corrupt = encoder_corrupt.get_layer_params()
 		self.z_denoised_top = z_denoised_top
-		self.z_enc = z_enc
+		self.z_enc_clean = d_clean['unlabelled']['z']
+		self.z_enc_corrupt = d_corrupt['unlabelled']['z']
 		self.n_inputs = z_denoised_top.get_value(borrow=True).shape[0]
+		self.z_est = None
 
 		#  should contain a list of 10 elements ...
 		self.hyper_params_values = hyper_params
 		self.init_hyper_params()
+		self.mu = d['unlabelled']['mu']
+		self.var = d['unlabelled']['sigma']
 		# self.n_outputs
 
 
@@ -44,10 +51,27 @@ class DecoderLadder(object):
 
 
 	def _decode(self):
-		self.u = T.dot(self.z_denoised_top, self.V)
-		mu = self.a1 * T.sigmoid(self.a2 * self.u + self.a3) + T.dot(self.a4, self.u) + self.a5
-		var = self.a6 * T.sigmoid(self.a7 * self.u + self.a8) + T.dot(self.a9, self.u) + self.a10 
+		if self.top:
+			self.u = 
+		else:
+			self.u = T.dot(self.z_denoised_top, self.V)
+
+		self.batch_normalize(self.u)
+		mu = self.a1 * T.nnet.sigmoid(self.a2 * self.u + self.a3) + T.dot(self.a4, self.u) + self.a5
+		var = self.a6 * T.nnet.sigmoid(self.a7 * self.u + self.a8) + T.dot(self.a9, self.u) + self.a10 
+		z_est = (self.z_enc_corrupt - mu)*var + mu
+		z_est_bn = (z_est - self.mu) / T.sqrt(self.var)
+		self.z_est = z_est
+		self.z_est_bn = z_est_bn
+		diff_vec = self.z_enc_clean - self.z_est_bn 
+		self.reconstruction_cost =  T.sum(T.sum(T.square(diff_vec), axis=1), axis=0)
 		
+		# reconstruction cost should be a scalar quantity
+		return self.reconstruction_cost
+
+
+	def getCost(self):
+		return self.reconstruction_cost
 
 
     def batch_normalize(self, z, mean=None, var=None):

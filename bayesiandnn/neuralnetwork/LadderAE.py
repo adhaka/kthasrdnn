@@ -63,8 +63,19 @@ class LadderAE(object):
 
 	#  apply enocder fist and then decoder functionality here ...
 	def apply(self):
-		self.encoder_pass()
-		self.decoder_pass()
+		clean_encoders, corrupt_encoders = self.encoder_pass()
+		cost_reconstruction = self.decoder_pass(clean_encoders, corrupt_encoders)
+		outLayer = corrupt_encoders[-1]
+		outLayer_clean = encoders[-1]
+		y_c_l = outLayer.d['labelled']['h']
+		y, d = outLayer_clean.get_layer_params()
+
+		supervised_cost = T.mean(T.sum(y_c_l, axis=1), axis=0)
+		cost = cost_reconstruction + supervised_cost
+
+		pred_cost = T.mean(T.sum(T.log(y), axis=1), axis=0)
+		correct_predictions = T.
+
 
 
 
@@ -98,18 +109,35 @@ class LadderAE(object):
 			input_labelled_corrupt = self.labelled(le_corrupt.h)
 			input_unlabelled_corrupt = self.unlabelled(le_corrupt.h)
 
+		self.clean_encoders
 
 
-	def decoder_pass():
+	def decoder_pass(self, clean_encoders, corrupt_encoders):
 		decoders = []
 		input_labelled = self.x_labelled
 		input_unlabelled = self.x_unlabelled
+		L = self.L
+
 		#  decalring the list of hyper paramsters for each layer here .. to be optimised later ..
 		l1_params = []
+		u = clean_encoders[-1].h
+		u_c = corrupt_encoders[-1].h
+		u_c_ul, u_c_l = self.seperate(u_c)
+		z_c_ul, z_c_l =u_c_ul, u_c_l
+		hyper_params = [0, 1, 0, 0, 0, 0, 1, 0, 0, 0]
+		r_cost =[]
+
 		for l in L:1:-1:
+			n_outputs = self.hidden_layer_config[l]
+			d = DecoderLadder(z_denoised_top=z_c_ul, encoder=clean_encoders[l], encoder_corrupt=corrupt_encoders[l], n_outputs=n_outputs, hyper_params=hyper_params)
+			z_c_ul = self.split(d.z_est)
+			r_c = d.getCost()
+			r_cost = r_c + r_cost
+			decoders = d + decoders
 
-
-
+		self.decoders = decoders
+		total_reconstruct_cost = reduce(lambda x,y:x+y, r_cost)
+		return total_reconstruct_cost
 
 
 
