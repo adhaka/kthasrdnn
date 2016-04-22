@@ -8,7 +8,7 @@ from theano.tensor.shared_randomstreams import RandomStreams
 
 
 NUM_EPOCHS = 100
-mnist = mnist.load_mnist_numpy('mnist.pkl.gz')
+mnist = mnist.load_mnist_numpy('mnist.pkl.gz', binarize=True)
 
 # print mnist
 

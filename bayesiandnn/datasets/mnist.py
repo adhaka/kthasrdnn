@@ -9,9 +9,11 @@ import theano
 import math
 import random
 from collections import Counter
+from utils.utils import *
 from theano import tensor as T
 
 BATCH_SIZE = 300
+NUM_CLASSES = 10
 
 # load dataset mnist
 
@@ -37,11 +39,18 @@ def _load_data(dataset):
 
 
 
-def load_mnist_numpy(dataset):
+def load_mnist_numpy(dataset, binarize=True):
 	train_set, valid_set, test_set = _load_data(dataset)
 	ts_x, ts_y = train_set
 	va_x, va_y = valid_set
 	te_x, te_y = test_set
+	# ts_y_bin = one_of_K_encoding(ts_y)
+	# va_y_bin = one_of_K_encoding(va_y)
+	# te_y_bin = one_of_K_encoding(te_y)
+
+	# if binarize == True:
+		# return [(ts_x, ts_y_bin), (va_x, va_y_bin), (te_y_bin)]
+
 	return [(ts_x, ts_y), (va_x, va_y), (te_x, te_y)] 
 
 

@@ -57,11 +57,19 @@ class DNN(object):
 		return self.opLayer.cost(estimate, y)
 
 
+
 	def calcAccuracy(self, X, y):
 		act = self.forward(X)
 		estimate = act[-1]
 		return self.opLayer.calcAccuracy(estimate, y)
+
+
+	def calcAccuracyTimit(self, X, y):
+		act = self.forward(X)
+		estimate = act[-1]
+		return self.opLayer.calcAccuracyTimitMono(estimate, y)
 		
+
 
 	def prettyprint():
 		print self.w.get_value()
