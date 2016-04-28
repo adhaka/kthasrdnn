@@ -1,4 +1,10 @@
-import numpy as np 
+# @author:Akash
+# @package:bayesiandnn
+
+from os import sys, path
+sys.path.append(path.dirname(path.dirname( path.abspath(__file__) ) ) )
+
+import numpy as np
 from neuralnetwork.learning.sgd import *
 from neuralnetwork.DNN import DNN 
 from neuralnetwork.SdA import SdA

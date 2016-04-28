@@ -1,3 +1,10 @@
+# @author:Akash
+# @package:bayesiandnn
+
+from os import sys, path
+sys.path.append(path.dirname(path.dirname( path.abspath(__file__) ) ) )
+
+
 import numpy as np
 import theano
 import theano.tensor as T 
@@ -27,7 +34,7 @@ train_x_unlabel = train_set_x[20000:30000,:]
 # train_x_unlabel = np.zeros((1000, train_x_label.shape[1]), dtype='float32')
 # 
 
-network = SSDAE(numpy_rng, [2000, 2000, 2000, 2000], train_x_label, train_y_label, train_x_unlabel)
+network = SSDAE(numpy_rng, [3000], train_x_label, train_y_label, train_x_unlabel)
 # train_fns = network.get_training_functions()
 network.trainSGD()
 

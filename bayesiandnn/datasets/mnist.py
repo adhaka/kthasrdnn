@@ -9,7 +9,7 @@ import theano
 import math
 import random
 from collections import Counter
-from utils.utils import *
+# from utils.utils import *
 from theano import tensor as T
 
 BATCH_SIZE = 300
@@ -18,6 +18,8 @@ NUM_CLASSES = 10
 # load dataset mnist
 
 #load data with path as dataset, could be absolute and relative at the same time. 
+
+SEED = 12354
 
 def _load_data(dataset):
 	dirpath, filename = os.path.split(dataset)
@@ -39,26 +41,35 @@ def _load_data(dataset):
 
 
 
-def load_mnist_numpy(dataset, binarize=True):
+def load_mnist_numpy(dataset, binarize=True, shuffle=True):
 	train_set, valid_set, test_set = _load_data(dataset)
 	ts_x, ts_y = train_set
 	va_x, va_y = valid_set
 	te_x, te_y = test_set
-	# ts_y_bin = one_of_K_encoding(ts_y)
-	# va_y_bin = one_of_K_encoding(va_y)
-	# te_y_bin = one_of_K_encoding(te_y)
+	np.random.seed(seed=SEED)
+	indices = np.arange(len(ts_y))
+	np.random.shuffle(indices)
+
+	ts_x = ts_x[indices]
+	ts_y = ts_y[indices]
+	
+	# if binarize:
+	# 	ts_y_bin = one_of_K_encoding(ts_y)
+	# 	va_y_bin = one_of_K_encoding(va_y)
+	# 	te_y_bin = one_of_K_encoding(te_y)
 
 	# if binarize == True:
 		# return [(ts_x, ts_y_bin), (va_x, va_y_bin), (te_y_bin)]
 
-	return [(ts_x, ts_y), (va_x, va_y), (te_x, te_y)] 
+	return (ts_x, ts_y), (va_x, va_y), (te_x, te_y)
 
 
 
 def load_mnist_theano(dataset):
 	# if not os.path.exists(dataset):
 	# 	raise Exception('file path error')
-	train_set, valid_set, test_set = _load_data(dataset)
+	# train_set, valid_set, test_set = _load_data(dataset)
+	train_set, valid_set, test_set = load_mnist_numpy(dataset)
 
 	def shared_dataset(data_xy, borrow = True):
 		data_x, data_y = data_xy

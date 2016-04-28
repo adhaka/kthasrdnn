@@ -54,7 +54,6 @@ def readTIMIT(datapath='timit-mfcc-mono-tr.pfile.gz', format='pfile', shared=Fal
 # divide into a ratio of 70,15,15
 # use it only for numpy
 def make_sets(x, y):
-	print x
 	indices = x.shape[0]
 	seed = 1111
 	np.random.seed(seed)
@@ -84,7 +83,7 @@ def make_shared_sets(x, y):
 
 
 
-def shared_dataset(data_xy, borrow = True):
+def shared_dataset(data_xy, borrow=True):
 	data_x, data_y = data_xy
 	shared_x = theano.shared(np.asarray(data_x, dtype=np.float32), borrow=borrow)
 	shared_y = theano.shared(np.asarray(data_y, dtype=np.float32), borrow=borrow)
