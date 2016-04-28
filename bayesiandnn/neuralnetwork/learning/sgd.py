@@ -91,6 +91,8 @@ def bsgd(nn, data, name='sgd', lr=0.028, alpha=0.3, batch_size=400, epochs=10):
 			c,a = batch_sgd_train(index=batch, learning_rate=LR.getRate(), momentum=alpha)
 			train_accuracy.append(a)
 		print LR.getRate()
+		wt = nn.get_weight()
+		print np.mean(wt[0].flatten()), np.mean(wt[1].flatten()), np.mean(wt[2].flatten())
 		print "epoch:", n, "  train accuracy", np.mean(a)
 		train_error_current = 1.0 - np.mean(a)
 		train_error_epochs.append(np.mean(a))

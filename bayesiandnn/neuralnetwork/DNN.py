@@ -1,10 +1,12 @@
+# @author:Akash
+# @package:bayesiandnn
+
 import numpy as np 
 import cPickle, gzip
 import theano
 import math
 import theano.tensor as T
 from layers.HiddenLayer import HiddenLayer, LogisticRegression
-
 
 
 # class model for implementing a deep neural network with multpile hidden layers.
@@ -70,9 +72,17 @@ class DNN(object):
 		return self.opLayer.calcAccuracyTimitMono(estimate, y)
 		
 
+	def prettyprint(self):
+		pass
+		# print self.w.get_value()
+		# print self.b.get_value()
 
-	def prettyprint():
-		print self.w.get_value()
-		print self.b.get_value()
 
+	def get_weight(self):
+		w_list = []
+		for l in self.layers:
+			print l.get_weight().shape
+			w_list.append(l.get_weight())
 
+		w_list.append(self.opLayer.get_weight())
+		return w_list
