@@ -30,7 +30,7 @@ class EncoderLadder(object):
             borrow=True
         )
 
-		
+        self.params = []		
 		self.x_combined = self.join(self.x_labelled, self.x_unlabelled)
         self.layer_values['W'] = self.W
         self.join = lambda x,y: T.concatenate([x, y], axis=0)
@@ -106,8 +106,13 @@ class EncoderLadder(object):
     	return mu, sigma
 
 
-    def get_layer_params(self):
+    def get_layer_vals(self):
     	return self.h, self.d
+
+
+    def get_layer_params(self):
+        self.params = [self.W, self.gamma, self.beta]
+        return self.params
 
 
     def batch_normalize(self, z, mean=None, var=None):

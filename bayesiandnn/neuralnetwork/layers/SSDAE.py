@@ -54,7 +54,7 @@ class SSDAE(object):
 		index_lab = T.ivector('index_lab')
 		momentum = T.scalar('momentum')
 		learning_rate = T.scalar('learning_rate')
-		cost, updates = self.get_cost_updates(self.x_lab, self.x_unlab, self.y_lab)
+		# cost, updates = self.get_cost_updates(self.x_lab, self.x_unlab, self.y_lab)
 
 		self.batch_size_lab = self.batch_size * self.alpha
 		self.batch_size_unlab = self.batch_size * (1-self.alpha)
@@ -70,6 +70,7 @@ class SSDAE(object):
 		pretraining_fns = []
 		for i in xrange(len(hidden_layers)):
 			ssda = self.layers[i]
+			exit()
 			cost, updates = ssda.get_cost_updates(self.x_lab, self.x_unlab, self.y_lab)
 			train_fn = theano.function(inputs=[index_lab, index_unlab], updates=updates, outputs=[cost], givens={self.x_lab:self.x_lab[index_lab], self.x_unlab:self.x_unlab[index_unlab], self.y_lab:self.y_lab[index_lab]})
 			pretraining_fns.append(train_fn)
@@ -92,7 +93,7 @@ class SSDAE(object):
 				for j in xrange(self.num_batches):
 					index_lab = indices_lab[j*self.batch_size_lab:(j+1)*self.batch_size_lab]
 					index_unlab = indices_unlab[j*self.batch_size_unlab:(j+1)*self.batch_size_unlab]
-					c,a = pretrain_fns[i](index_lab=index_lab, index_unlab, index_unlab=index_unlab)
+					c,a = pretrain_fns[i](index_lab=index_lab, index_unlab=index_unlab)
 
 
 		# pass
@@ -103,7 +104,7 @@ class SSDAE(object):
 
 # move it to layers folder later .. 
 class SSLayer(object):
-	def __init__(self, numpy_rng, theano_rng, n_inputs, n_outputs, n_targets, corruption=0.40, batch_size=400, activation='sigmoid'):
+	def __init__(self, numpy_rng, theano_rng, n_inputs, n_outputs, n_targets, corruption=0.30, batch_size=400, activation='sigmoid'):
 		self.rng = rng
 		self.n_inputs = n_inputs
 		self.n_outputs = n_outputs 
@@ -115,9 +116,9 @@ class SSLayer(object):
 		self.x_lab = None
 		self.x_unlab = None
 		self.y_lab = None
-		self.softmaxLayer = LogisticRegression(self.rng, n_outputs, n_targets)
+		self.softmaxLayer = LogisticRegression(self.rng, n_outputs, n_targets, init_zero=False)
 		self.params = self.encoder.params + self.decoder.params + self.softmaxLayer.params 
-		self.delta_params = self.encoder.delta_params + self.decoder.delta_params + self.softmaxLayer		
+		self.delta_params = self.encoder.delta_params + self.decoder.delta_params + self.softmaxLayer.delta_params		
 
 
 	@staticmethod
@@ -137,12 +138,14 @@ class SSLayer(object):
 		cost_reconstruction_unlab = T.mean((z_unlab-x_unlab)*(z_unlab-x_unlab))
 		cost_reconstruction_lab = T.mean()  
 		cost_classification = self.softmaxLayer.cost(x_lab, y_lab)
-		cost = cost_reconstruction + cost_classification
+		cost = cost_reconstruction + 100*cost_classification 
 
 		updates = OrderedDict()
-		gparams = T.grad(cots, wrt=self.params)
+		gparams = T.grad(cost, wrt=self.params)
 		for p, gp in zip(params, gparams):
 			updates[p] = p - gp*learning_rate
+
+		exit()
 
 		return (cost, accuracy)
 

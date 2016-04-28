@@ -16,7 +16,7 @@ class DecoderLadder(object):
 					size=(n_inputs, n_outputs)
 					),
 					dtype=theano.config.floatX),
-					name='W',
+					name='V',
 					borrow=True
 					)		
 
@@ -33,6 +33,7 @@ class DecoderLadder(object):
 		self.init_hyper_params()
 		self.mu = d['unlabelled']['mu']
 		self.var = d['unlabelled']['sigma']
+		self.params = [self.V]
 		# self.n_outputs
 
 
@@ -48,11 +49,12 @@ class DecoderLadder(object):
 		self.a8 = init_param(self.hyper_params_values[7], 'a8')
 		self.a9 = init_param(self.hyper_params_values[8], 'a9')
 		self.a10 = init_param(self.hyper_params_values[9], 'a10')
+		self.a = [self.a1, self.a2, self.a3, self.a4, self.a5, self.a6, self.a7, self.a8, self.a9, self.a10]
 
 
 	def _decode(self):
 		if self.top:
-			self.u = 
+			self.u = z
 		else:
 			self.u = T.dot(self.z_denoised_top, self.V)
 
@@ -70,19 +72,23 @@ class DecoderLadder(object):
 		return self.reconstruction_cost
 
 
-	def getCost(self):
+	def get_cost(self):
 		return self.reconstruction_cost
 
 
-    def batch_normalize(self, z, mean=None, var=None):
-    	mu = mean
-    	sigma = var
-    	if not mu or not sigma:
-    		mu, sigma = self._calculate_moments(z)
-    	mu_mat = mu.dimshuffle(0,'x')
-    	sigma_mat = sigma.dimshuffle(0, 'x')
-    	z_norm = (z - mu_mat) / (T.sqrt(sigma_mat + 1e-10))
-    	return z_norm
+	def get_layer_params(self):
+		self.params += self.a
+		return self.params
+
+	def batch_normalize(self, z, mean=None, var=None):
+		mu = mean
+		sigma = var
+		if not mu or not sigma:
+			mu, sigma = self._calculate_moments(z)
+		mu_mat = mu.dimshuffle(0,'x')
+		sigma_mat = sigma.dimshuffle(0, 'x')
+		z_norm = (z - mu_mat) / (T.sqrt(sigma_mat + 1e-10))
+		return z_norm
 
 
 
