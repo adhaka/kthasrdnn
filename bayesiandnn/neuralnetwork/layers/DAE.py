@@ -8,6 +8,11 @@ from theano.tensor.shared_randomstreams import RandomStreams
 # in autoencoders, each layer is greedily trained with respect to the final output.
 
 class DAE(object):
+	'''
+	this class is implemented as a basic underlying layer to make a stacked denoising auto-encoder...
+	This is a denoising auto-encoder basic layer.
+	'''
+
 	def __init__(self, numpy_rng, theano_rng, inp, n_inputs, n_hiddens, w, bhid=None, bvis=None, corruption=0.25, activation='sigmoid'):
 		self.numpy_rng = numpy_rng
 		self.n_inputs = n_inputs
@@ -119,3 +124,13 @@ class DAE(object):
 	def kl_divergence(x, x_hat):
 		return x*T.log(x/x_hat) + (1-x) * T.log((1-x) / (1-x_hat))
 
+
+
+
+# contractive auto-encoders
+class CAE():
+	'''class to implement contrastive auto encoders
+		which include frobenius norm of the derivative of the 
+		hidden layer output with respect to input.
+	'''
+	pass

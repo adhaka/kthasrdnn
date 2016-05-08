@@ -6,7 +6,7 @@ import theano
 import theano.tensor as T 
 from theano import config
 
-# this function will only work for MNIST or any other dataset where the classes are ordered from 0-K.
+# this function will only work for MNIST or any other dataset where the classes are ordered from {0 - K-1}.
 def one_of_K_encoding(out, num_classes):
 	if type(out) == list:
 		numel = len(out)
@@ -22,7 +22,16 @@ def one_of_K_encoding(out, num_classes):
 
 
 def reduce_encoding(out, start_class=0):
-	pass
+	if type(out) == list:
+		return out
+	elif isinstance(out, np.ndarray):
+		if len(out.shape) == 1:
+			out_l = out.tolist()
+			return  out_l
+			# raise Exception('dimensionality of numpy array should be atleast 2')
+		out_l = np.argmax(out, axis=1)
+		out_l = out_l.tolist()
+		return out_l
 
 
 # this function maps output list with classes with new classes which range from 0 to num_classes - 1. 

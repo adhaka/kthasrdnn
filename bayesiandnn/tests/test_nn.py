@@ -18,6 +18,6 @@ mnist = mnist.load_mnist_theano('mnist.pkl.gz')
 print mnist
 
 rng = np.random.RandomState(1111)
-nn = DNN(rng, [3096, 3096], 784, 10)
-bsgd(nn, mnist, epochs=40)
+nn = DNN(rng, [6000, 6000], 784, 10)
+bsgd(nn, mnist, epochs=60, percent_data=0.04)
 

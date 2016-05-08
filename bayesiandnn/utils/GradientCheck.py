@@ -10,4 +10,7 @@ class GradientCheck(object):
 	..
 
 	'''
-	def __init__(self, )
+	def __init__(self, symbolic_gradient, numeric_gradient):
+		pass
+
+	

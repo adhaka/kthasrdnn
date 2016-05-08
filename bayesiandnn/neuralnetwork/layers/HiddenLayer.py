@@ -33,6 +33,9 @@ class HiddenLayer(object):
         	)
 		# self.w = theano.shared(value=np.zeros((n_inputs, n_outputs), dtype=theano.config.floatX), name='w', borrow=True)
 
+		# if type(init_w) == 
+
+
 		if init_b:
 			self.b = init_b
 		else:
@@ -82,6 +85,18 @@ class HiddenLayer(object):
 		return self.b.get_value()
 
 
+# setter functions ...
+	def set_weight(self, w_np):
+		self.w.set_value(w_np)
+
+
+	def set_bias(self, b_np):
+		if type(b_np) in ['list', 'tuple']:
+			b_np = np.asarray(b_np)
+		self.b.set_value(b_np)
+
+
+
 
 
 class LogisticRegression(object):
@@ -107,7 +122,7 @@ class LogisticRegression(object):
 
 
 	def output(self, X):
-		out = super(LogisticRegression, self).output()
+		return self.calcProb(X)
 
 
 	def calcProb(self, X):
@@ -117,6 +132,8 @@ class LogisticRegression(object):
 	def predict(self, X):
 		return T.argmax(self.calcProb(X), axis=1)
 
+	# def predict_np(self, x_np):
+	# 	mult = 
 
 	# two ways of calculating the cost function, basically this is the objective function, and its value has to be minimised,
 	# categorical cross-entropy error implementation where the classes are from: 0 to C-1.
@@ -161,9 +178,15 @@ class LogisticRegression(object):
 		return self.params
 
 
-	def set_weight(self):
-		pass
+	# setter functions ...
+	def set_weight(self, w_np):
+		self.w.set_value(w_np)
 
+
+	def set_bias(self, b_np):
+		if type(b_np) in ['list', 'tuple']:
+			b_np = np.asarray(b_np)
+		self.b.set_value(b_np)
 
 
 

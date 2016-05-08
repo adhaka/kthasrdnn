@@ -1,6 +1,7 @@
 
 import numpy as np 
 import math
+import csv
 import theano
 import random
 import theano.tensor as T
@@ -16,14 +17,14 @@ from utils.LearningRate import Learning_Rate_Linear_Decay
 
 #  function to perform stochastic gradient descent
 
-def bsgd(nn, data, name='sgd', lr=0.028, alpha=0.3, batch_size=400, epochs=10):
+def bsgd(nn, data, name='sgd', lr=0.028, alpha=0.3, batch_size=300, epochs=10, percent_data=1.):
 
 	train_set_x, train_set_y = data[0]
 	valid_set_x, valid_set_y = data[1]
 	test_set_x, test_set_y = data[2]
 
 	num_samples = train_set_x.get_value(borrow=True).shape[0] 
-	num_batches = num_samples / batch_size 
+	num_batches = int((num_samples / batch_size)  * percent_data)
 
 	layers = nn.layers
 	x = T.matrix('x')
@@ -58,7 +59,7 @@ def bsgd(nn, data, name='sgd', lr=0.028, alpha=0.3, batch_size=400, epochs=10):
 
 
 
-	batch_sgd_train = theano.function(inputs=[index, theano.Param(learning_rate, default=0.04), theano.Param(momentum, default=0.3)], outputs=[cost, accuracy], updates=updates, givens={x: train_set_x[index], y:train_set_y[index]})
+	batch_sgd_train = theano.function(inputs=[index, theano.Param(learning_rate, default=0.06), theano.Param(momentum, default=0.3)], outputs=[cost, accuracy], updates=updates, givens={x: train_set_x[index], y:train_set_y[index]})
 
 	batch_sgd_valid = theano.function(inputs=[], outputs=[nn.calcAccuracy(x, y)], givens={x: valid_set_x, y:valid_set_y})
 
@@ -80,24 +81,31 @@ def bsgd(nn, data, name='sgd', lr=0.028, alpha=0.3, batch_size=400, epochs=10):
 		return lidiff
 
 
+	ofile  = open('train_log.csv', "wb")
+	train_log_w = csv.writer(ofile, delimiter=' ')
+
 	for n in xrange(epochs):
 		np.random.shuffle(indices)
 		train_accuracy = []
-		if n > 2 and lr < 0.005:
-			print 'yes'
-			break
 		for i in xrange(num_batches):
 			batch = indices[i*batch_size: (i+1)*batch_size]
 			c,a = batch_sgd_train(index=batch, learning_rate=LR.getRate(), momentum=alpha)
 			train_accuracy.append(a)
 		print LR.getRate()
+		if LR.getRate() == 0:
+			break
 		wt = nn.get_weight()
-		print np.mean(wt[0].flatten()), np.mean(wt[1].flatten()), np.mean(wt[2].flatten())
+		# print np.mean(wt[0].flatten()), np.mean(wt[1].flatten()), np.mean(wt[2].flatten())
+		valid_accuracy = batch_sgd_valid()
+
+		
+		log_n = ["epoch:", str(n), "train_accuracy:", str(np.mean(a)), "validation_accuracy:", str(valid_accuracy[0])]
+		train_log_w.writerow(log_n)
+
 		print "epoch:", n, "  train accuracy", np.mean(a)
 		train_error_current = 1.0 - np.mean(a)
 		train_error_epochs.append(np.mean(a))
 		print "epoch:", n,  " validation accuracy:",  batch_sgd_valid()
-		valid_accuracy = batch_sgd_valid()
 		LR.updateError(error=(1.0 - valid_accuracy[0])*100.0)
 		LR.updateRate()
 
@@ -107,7 +115,7 @@ def bsgd(nn, data, name='sgd', lr=0.028, alpha=0.3, batch_size=400, epochs=10):
 
 
 
-def bsgd1(nn, data, name='sgd', lr=0.022, alpha=0.3, batch_size=400, epochs = 10):
+def bsgd1(nn, data, name='sgd', lr=0.022, alpha=0.3, batch_size=500, epochs = 10):
 
 	train_set_x, train_set_y = data[0]
 	valid_set_x, valid_set_y = data[1]

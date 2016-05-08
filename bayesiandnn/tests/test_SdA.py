@@ -31,8 +31,8 @@ theano_rng = RandomStreams(numpy_rng.randint( 2**30 ))
 # nn_ae = DNN(numpy_rng, [1024, 1024], 429, 144)
 # configuration for mnist
 
-nn_ae = DNN(numpy_rng, [4096, 4096], 784, 10)
-ae1 = SdA(train_set_x, numpy_rng, theano_rng, [4096, 4096], nn_ae)
+nn_ae = DNN(numpy_rng, [5096,  5096], 784, 10)
+ae1 = SdA(train_set_x, numpy_rng, theano_rng, [5096, 5096, 5096], nn_ae, ['tanh', 'tanh', 'tanh'])
 
 pretrain_fns = ae1.pretraining_functions(train_set_x, BATCH_SIZE)
 
@@ -52,6 +52,6 @@ for i in xrange(len(ae1.da_layers)):
 		print "pretraining reconstruction error:",i, epoch, np.mean(c)
 
 
-bsgd(nn_ae, mnist)
+bsgd(nn_ae, mnist, epochs=30)
 
 
