@@ -31,9 +31,9 @@ numpy_rng = np.random.RandomState(1111)
 theano_rng = RandomStreams(numpy_rng.randint( 2**30 ))
 
 # neural network for monophones 
-nn = DNN(numpy_rng, [3096, 3096, 3096, 3096], 429, 144)
+nn = DNN(numpy_rng, [5096, 5096, 5096], 429, 144)
 # nn = DNN(numpy_rng, [4096, 4096], 429, 48)
-MODE = 'invalid'
+MODE = 'usevalid'
 
 train_x, train_y = timit.readTIMIT('timit-mono-mfcc-train.pfile.gz', shared=False, listify=True)
 valid_x, valid_y = timit.readTIMIT('timit-mono-mfcc-valid.pfile.gz', shared=False, listify=False)
@@ -98,6 +98,6 @@ else:
 		xy = (x,y)
 		shared_x, shared_y = timit.shared_dataset(xy)
 		td = [(shared_x, shared_y), (valid_x, valid_y), (test_x, test_y)]
-		bsgd(nn, td, [valid_y_np, test_y_np], epochs=7)
+		bsgd(nn, td, [valid_y_np, test_y_np], epochs=9)
 
 

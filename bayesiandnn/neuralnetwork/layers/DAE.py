@@ -2,18 +2,19 @@ import numpy as np
 import os
 import theano
 import theano.tensor as T
-from theano.tensor.shared_randomstreams import RandomStreams 
+from theano.tensor.shared_randomstreams import RandomStreams
+from collections import OrderedDict 
 
 
 # in autoencoders, each layer is greedily trained with respect to the final output.
 
 class DAE(object):
 	'''
-	this class is implemented as a basic underlying layer to make a stacked denoising auto-encoder...
-	This is a denoising auto-encoder basic layer.
+	This class is implemented as a basic underlying layer to make a stacked denoising auto-encoder...
+	This is a denoising auto-encoder single layer. A stacked denoising auto-encoder can be made by stacking together
+	multiple such single layers.
 	'''
-
-	def __init__(self, numpy_rng, theano_rng, inp, n_inputs, n_hiddens, w, bhid=None, bvis=None, corruption=0.25, activation='sigmoid'):
+	def __init__(self, numpy_rng, theano_rng, inp, n_inputs, n_hiddens, w, bhid=None, bvis=None, corruption=0.25, activation='sigmoid', kl_div=True):
 		self.numpy_rng = numpy_rng
 		self.n_inputs = n_inputs
 		self.n_hiddens = n_hiddens
@@ -22,6 +23,7 @@ class DAE(object):
 		self.bhid = bhid
 		self.bvis = bvis
 		self.activation = activation
+		self.kl_div = kl_div
 		print n_inputs, n_hiddens
 
 		if not theano_rng:
@@ -89,7 +91,7 @@ class DAE(object):
 
 
 
-	def get_cost_updates(self, corruption_level=0.20, lr =0.04, momentum=0.3):
+	def get_cost_updates(self, corruption_level=0.30, lr =0.04, momentum=0.3):
 		""" This function computes the cost update after one epoch of training."""
 		corrupted_x = self.get_corrupted_input(self.x, corruption_level)
 		y = self.get_hidden_output(corrupted_x)
@@ -101,7 +103,10 @@ class DAE(object):
 		elif self.activation == 'tanh':
 			cost = T.sum((self.x - z)*(self.x - z), axis=1)
 
+		if self.kl_div:
+			cost = cost + self.kl_divergence(x, z)
 		cost = T.mean(cost)
+
 		#@TODO: add regularisation term to the cost variable. 
 		# regularise_penalty = l2penalty(self.w)
 
@@ -126,11 +131,42 @@ class DAE(object):
 
 
 
-
 # contractive auto-encoders
-class CAE():
-	'''class to implement contrastive auto encoders
+class CAE(DAE):
+	'''class to implement contractive auto encoders
 		which include frobenius norm of the derivative of the 
-		hidden layer output with respect to input.
+		hidden layer output with respect to input to the cost term.
+		serves as a single contractive auto-encoder layer.
 	'''
-	pass
+	def __init__(self, numpy_rng, theano_rng, inp, n_inputs, n_hiddens, w, bhid=None, bvis=None, lambda_constant=0.1, activation='tanh', kl_div=True):
+		super(DAE, self).__init__(numpy_rng, theano_rng, inp, n_inputs, n_hiddens, w, bhid, bvis, corruption=0.0, activation=activation, kl_div=kl_div)
+		self.lambda_constant = lambda_constant
+
+
+	def get_cost_updates(self, lambda_constant=0.1):
+		self.lambda_constant = 0.1
+		y = self.get_hidden_output(x)
+		z = self.get_reconstructed_output(y)
+		dy = y * (1 - y)
+		dydx = T.dot(dy, self.w.T)
+		frobenius_cost = T.sum((dydx ** 2), axis=1)
+
+		if self.activation == 'sigmoid':
+			cost = -T.sum(self.x * T.log(z) + (1 - self.x) * T.log(1-z), axis=1)
+		elif self.activation == 'tanh':
+			cost = -T.sum((self.x - z)*(self.x - z), axis=1)
+
+		cost = cost +  self.lambda_constant * frobenius_cost 
+
+		cost_mean = T.mean(cost)
+
+		gparams = T.grad(cost, wrt=self.params)
+		updates = [(p, p - lr*gp) for p,gp in zip(self.params, gparams)]
+		return (cost, updates)
+
+
+
+
+
+
+	
