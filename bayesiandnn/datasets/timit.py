@@ -36,12 +36,26 @@ def _load_raw_data(datapath):
 
 
 
-def readTIMIT(datapath='timit-mfcc-mono-tr.pfile.gz', format='pfile', shared=False, listify=False):
+def readTIMIT(datapath='timit-mfcc-mono-tr.pfile.gz', format='pfile', shared=False, listify=False, mapping=48):
 	file_reader = PfileIO(datapath)
 	file_reader.readpfileInfo()
 	file_reader.readPfile()
 	x, y = file_reader.generate_features(listify)
+
 	# stats = Counter(y)
+	# def divideby3(s):
+	if mapping == 48:
+		if isinstance(y, (list, tuple)) :
+			y = map(lambda x: map_y_48(x), y)
+		else:	
+			y = map_y_48(y)
+	elif mapping == 39:
+		if isinstance(y, (list, tuple)):
+			y = map(lambda x: map_y_39(x), y)
+		else:	
+			y = map_y_39(y)
+	
+
 	# print stats.most_common(100)
 	if shared == True:
 		x, y = shared_dataset((x, y))
@@ -101,6 +115,39 @@ def make_shared_partitions(x, y):
 	return shared_x, shared_y
 
 
+def map_y_48(y_inp):
+        y_out = map(lambda x: int(x/3.), y_inp)
+        return y_out
+
+
+def map_y_39(y):
+        # convert list of values to quotients of 3
+        y_48 = map(lambda x: int(x/3.), y)
+        y_39 = np.asarray(y_48)
+        y_39[y_39 == 14] = 27
+        y_39[y_39 == 5] = 2
+        y_39[y_39 == 3] = 0
+        y_39[y_39 == 15] = 29
+        y_39[y_39 == 47] = 36
+        y_39[y_39 == 23] = 22
+        y_39[y_39 == 43] = 37
+        y_39[y_39 == 16] = 37
+        y_39[y_39 == 9] = 37
+
+        print min(y_39), max(y_39)
+        print min(y_48), max(y_48)
+        phoneme_count = Counter(y_39)
+        ph = phoneme_count.keys()
+        ph.sort()
+        p_keys = range(39)
+        p_map = zip(ph, p_keys)
+        # print p_map
+        for x,y in p_map:
+                y_39[y_39 == x] = y
+
+        print min(y_39), max(y_39)
+        y_39 = y_39.tolist()
+        return y_39
 
 
 

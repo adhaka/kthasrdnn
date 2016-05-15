@@ -17,7 +17,7 @@ from utils.LearningRate import Learning_Rate_Linear_Decay
 
 #  function to perform stochastic gradient descent
 
-def bsgd(nn, data, name='sgd', lr=0.028, alpha=0.3, batch_size=300, epochs=10, percent_data=1.):
+def bsgd(nn, data, name='sgd', lr=0.06, alpha=0.3, batch_size=300, epochs=20, percent_data=1.):
 
 	train_set_x, train_set_y = data[0]
 	valid_set_x, valid_set_y = data[1]
@@ -33,11 +33,12 @@ def bsgd(nn, data, name='sgd', lr=0.028, alpha=0.3, batch_size=300, epochs=10, p
 
 	cost = nn.cost(x, y)
 	accuracy = nn.calcAccuracy(x, y)
+	accuracy_phonemes = nn.calcAccuracyTimit(x, y)
 	params = nn.params
 	delta_params = nn.delta_params
 
 	print theano.pp(cost)
-	LR = Learning_Rate_Linear_Decay(start_rate=0.04)
+	LR = Learning_Rate_Linear_Decay(start_rate=lr)
 	# theano.pp(accuracy)
 	index = T.ivector('index')
 	learning_rate = T.scalar('learning_rate')
@@ -59,15 +60,14 @@ def bsgd(nn, data, name='sgd', lr=0.028, alpha=0.3, batch_size=300, epochs=10, p
 
 
 
-	batch_sgd_train = theano.function(inputs=[index, theano.Param(learning_rate, default=0.06), theano.Param(momentum, default=0.3)], outputs=[cost, accuracy], updates=updates, givens={x: train_set_x[index], y:train_set_y[index]})
+	batch_sgd_train = theano.function(inputs=[index, theano.Param(learning_rate, default=0.045), theano.Param(momentum, default=0.3)], outputs=[cost, accuracy, accuracy_phonemes], updates=updates, givens={x: train_set_x[index], y:train_set_y[index]})
 
 	batch_sgd_valid = theano.function(inputs=[], outputs=[nn.calcAccuracy(x, y)], givens={x: valid_set_x, y:valid_set_y})
 
-	batch_sgd_test = theano.function(inputs=[], outputs=nn.calcAccuracy(x, y), givens={x: test_set_x, y:test_set_y})
+	batch_sgd_test = theano.function(inputs=[], outputs=[nn.calcAccuracy(x, y), nn.calcAccuracyTimit(x, y), nn.calcAccuracyTimitMono39(x, y)], givens={x: test_set_x, y:test_set_y})
 
 	indices = np.arange(num_samples,  dtype=np.dtype('int32'))
 	np.random.shuffle(indices)
-
 	train_error_epochs = []
 
 
@@ -89,8 +89,8 @@ def bsgd(nn, data, name='sgd', lr=0.028, alpha=0.3, batch_size=300, epochs=10, p
 		train_accuracy = []
 		for i in xrange(num_batches):
 			batch = indices[i*batch_size: (i+1)*batch_size]
-			c,a = batch_sgd_train(index=batch, learning_rate=LR.getRate(), momentum=alpha)
-			train_accuracy.append(a)
+			c,a1,a2 = batch_sgd_train(index=batch, learning_rate=LR.getRate(), momentum=alpha)
+			train_accuracy.append(a1)
 		print LR.getRate()
 		if LR.getRate() == 0:
 			break
@@ -99,24 +99,23 @@ def bsgd(nn, data, name='sgd', lr=0.028, alpha=0.3, batch_size=300, epochs=10, p
 		valid_accuracy = batch_sgd_valid()
 
 		
-		log_n = ["epoch:", str(n), "train_accuracy:", str(np.mean(a)), "validation_accuracy:", str(valid_accuracy[0])]
+		log_n = ["epoch:", str(n), "train_accuracy:", str(np.mean(a1)), " train_accuracy_phonemes:", str(np.mean(a2)) , " validation_accuracy:", str(valid_accuracy[0])]
 		train_log_w.writerow(log_n)
 
-		print "epoch:", n, "  train accuracy", np.mean(a)
-		train_error_current = 1.0 - np.mean(a)
-		train_error_epochs.append(np.mean(a))
-		print "epoch:", n,  " validation accuracy:",  batch_sgd_valid()
+		print "epoch:", str(n), "train_accuracy:", str(np.mean(a1)), " train_accuracy_phonemes:", str(np.mean(a2)) , " validation_accuracy:", str(valid_accuracy[0])
+		# print "epoch:", n, "  train accuracy", np.mean(a1)
+		train_error_current = 1.0 - np.mean(a1)
+		train_error_epochs.append(np.mean(a1))
 		LR.updateError(error=(1.0 - valid_accuracy[0])*100.0)
 		LR.updateRate()
 
-
-	print batch_sgd_test()
+	test_accuracy = batch_sgd_test()
+	print test_accuracy[0], test_accuracy[1], test_accuracy[2]
 
 
 
 
 def bsgd1(nn, data, name='sgd', lr=0.022, alpha=0.3, batch_size=500, epochs = 10):
-
 	train_set_x, train_set_y = data[0]
 	valid_set_x, valid_set_y = data[1]
 	test_set_x, test_set_y = data[2]

@@ -38,17 +38,19 @@ class DNN(object):
 				print w_np
 				# exit()
 				# w = theano.shared(value=np.asarray(w_np, dtype=theano.config.floatX), name='We', borrow=True)
-				w = theano.shared(
-            		value=np.asarray(
-                		rng.uniform(
-                    		low=-6*np.sqrt(6. / (n_inputs + n_outputs)),
-                    		high=6*np.sqrt(6. / (n_inputs + n_outputs)),
-                    		size=(n_inputs, n_outputs)
-                		),
-                		dtype=theano.config.floatX),
-            		name='w',
-            		borrow=True
-        		)
+				# w = theano.shared(
+    #         		value=np.asarray(
+    #             		rng.uniform(
+    #                 		low=-6*np.sqrt(6. / (n_inputs + n_outputs)),
+    #                 		high=6*np.sqrt(6. / (n_inputs + n_outputs)),
+    #                 		size=(n_inputs, n_outputs)
+    #             		),
+    #             		dtype=theano.config.floatX),
+    #         		name='w',
+    #         		borrow=True
+    #     		)
+
+				w = theano.shared(value=np.asarray(rng.random(size=(n_inputs, n_outputs)),dtype=theano.config.floatX),name='w',borrow=True)
 				HL = HiddenLayer(self.rng, prev_out, self.n_out, init_w=w)
 				# prev_out = 
 				self.params += HL.params
@@ -96,6 +98,12 @@ class DNN(object):
 		estimate = act[-1]
 		return self.opLayer.calcAccuracyTimitMono(estimate, y)
 		
+
+	def calcAccuracyTimitMono39(self, X, y):
+		act = self.forward(X)
+		estimate = act[-1]
+		return self.opLayer.calcAccuracyTimitMono39(estimate, y)
+
 
 	def prettyprint(self):
 		pass

@@ -48,6 +48,7 @@ class SSDAE(object):
 		# self.x_total = 
 		self.num_samples = self.x_lab_np.shape[0] + self.x_unlab_np.shape[0]
 		input_size = self.x_lab_np.shape[1]
+		self.input_size = input_size
 
 		target_size = len(list(set(utils.reduce_encoding(y_lab_np))))
 		self.target_size = target_size
@@ -136,7 +137,7 @@ class SSDAE(object):
 # this function does the complete training for the network. single point function.
 	def trainSGD(self):
 		self.num_batches = int(self.num_samples / self.batch_size)
-		NUM_EPOCHS = [140, 1, 1]
+		NUM_EPOCHS = [160, 1, 1]
 		x_lab_shared = self._shared_dataset(self.x_lab_np)
 		x_unlab_shared = self._shared_dataset(self.x_unlab_np)
 		y_lab_shared = self._shared_dataset_y(self.y_lab_np)
@@ -150,6 +151,7 @@ class SSDAE(object):
 		c3 = []
 		c4 = []
 
+
 		print "............ Pretrainining ..............."
 		# pretraining loop for all the hidden layers .....
 		for i in xrange(len(self.hidden_layers)):
@@ -157,7 +159,7 @@ class SSDAE(object):
 			la = self.layers[i]
 			wc_np = la.softmaxLayer.w.get_value()
 			print "yay"
-			print np.mean(wc_np[110,:])
+			print np.mean(wc_np[160,:])
 
 			for epoch in xrange(total_epochs):
 				for j in xrange(self.num_batches - 1):
@@ -200,9 +202,10 @@ class SSDAE(object):
 
 
 	def trainSGDSupervised(self):
-		# dnn = DNN(self.numpy_rng, [self.hidden_layers[-1]], self.hidden_layers[-1], 10, w_layers=[self.layers[-1].encoder.get_weight()])
+		# dnn = DNN(self.numpy_rng, [self.hidden_layers[-1]], self.hidden_layers[-1], 10, w_layers=[self.layers[0].encoder.get_weight()], b_layers=[self.layers[0].encoder.get_bias()])
 		
 		# mnist_data = mnist.load_mnist_theano('mnist.pkl.gz')
+		# Hl = HiddenLayer(self.numpy_rng, self.input_size, self.hidden_layers[0], init_w=self.layers[0].get_weight(), init_b=self.layers[0].get_bias(), activation='tanh')
 		mnist_data = mnist.load_mnist_numpy('mnist.pkl.gz')
 		print "............... Final training starts now ........."
 		# bsgd(dnn, mnist_data, epochs=40)
@@ -211,9 +214,9 @@ class SSDAE(object):
 		valid_set_x, valid_set_y = mnist_data[1]
 		test_set_x, test_set_y = mnist_data[2]
 
-		train_set_x, train_set_y = train_set_x[:10000,:], train_set_y[:10000]
+		train_set_x, train_set_y = train_set_x[:600,:], train_set_y[:600]
 		batch_size = 300
-		epochs = 200
+		epochs = 240
 
 		x_final = T.matrix('x_final')
 		y_final = T.ivector('y_final')
@@ -226,6 +229,9 @@ class SSDAE(object):
 		z1_valid_np = np.tanh(np.dot(valid_set_x, self.layers[0].get_weight()) + self.layers[0].get_bias())
 		z2_valid_np = np.tanh(np.dot(z1_valid_np, self.layers[1].get_weight()) + self.layers[1].get_bias())
 		z3_valid_np = np.tanh(np.dot(z2_valid_np, self.layers[2].get_weight()) + self.layers[2].get_bias())
+		z1_test_np = np.tanh(np.dot(test_set_x, self.layers[0].get_weight()) + self.layers[0].get_bias())
+		z2_test_np = np.tanh(np.dot(z1_test_np, self.layers[1].get_weight()) + self.layers[1].get_bias())
+		z3_test_np = np.tanh(np.dot(z2_test_np, self.layers[2].get_weight()) + self.layers[2].get_bias())
 
 
 		z1 = self.layers[0].encoder.output(x_final)
@@ -247,8 +253,10 @@ class SSDAE(object):
 		valid_set_x_shared = get_shared(valid_set_x)
 		valid_set_z_shared = get_shared(z1_valid_np)
 		test_set_x_shared = get_shared(test_set_x)
+		test_set_z_shared = get_shared(z1_test_np)
 		train_set_y_shared = get_shared_int(train_set_y)
 		valid_set_y_shared = get_shared_int(valid_set_y)
+		test_set_y_shared = get_shared_int(test_set_y)
 
 
 		num_samples = train_set_x.shape[0] 
@@ -257,8 +265,9 @@ class SSDAE(object):
 
 		supervised_cost = self.logLayer.cost(x_final, y_final) 
 		supervised_accuracy = self.logLayer.calcAccuracy(x_final, y_final)
-		params_supervised = self.layers[-1].encoderParams + self.logLayer.params
-		# print params_supervised
+		# params_supervised = self.layers[-1].encoderParams + self.logLayer.params
+		# params_supervised = Hl.params + self.logLayer.params
+
 		# exit() 
 		params_supervised =  self.logLayer.params
 
@@ -296,7 +305,7 @@ class SSDAELayer(object):
 
 	# class variable to keep track of layers created 
 	__layer_nums = count(0)
-	def __init__(self, numpy_rng, theano_rng, n_inputs, n_outputs, n_targets, x_lab=None, x_unlab=None, y_lab=None, learning_rate = 0.07, corruption=0.20, batch_size=400, tied=False, activation='tanh'):
+	def __init__(self, numpy_rng, theano_rng, n_inputs, n_outputs, n_targets, x_lab=None, x_unlab=None, y_lab=None, learning_rate = 0.016, corruption=0.20, batch_size=400, tied=False, activation='tanh'):
 		self.numpy_rng = numpy_rng
 		self.theano_rng = theano_rng
 		self.n_inputs = n_inputs
@@ -372,8 +381,8 @@ class SSDAELayer(object):
 		preds_lab = self.softmaxLayer.predict(out_lab)
 		self.preds_lab = preds_lab
 		# alpha=0
-		beta=1
-		alpha = 100
+		beta=1000
+		alpha = 3
 		lr = Learning_Rate_Linear_Decay(start_rate=0.02)
 
 		# accuracy = self.softmaxLayer.calcAccuracy(out_lab, y_lab)
@@ -382,10 +391,10 @@ class SSDAELayer(object):
 		if self.activation == 'sigmoid':
 			crl = -T.sum(self.x_lab * T.log(z_lab) + (1 - self.x_lab) * T.log(1 - z_lab), axis=1)
 			cost_reconstruction_lab = T.mean(crl)
-			cost_reconstruction_unlab = T.mean(-T.sum(self.x_unlab * T.log(z_unlab) + (1 - self.x_unlab) * T.log(1-z_unlab), axis=1))
+			cost_reconstruction_unlab = T.mean(-T.mean(self.x_unlab * T.log(z_unlab) + (1 - self.x_unlab) * T.log(1-z_unlab), axis=1))
 		elif self.activation == 'tanh':
-			cost_reconstruction_lab = T.mean(T.sum((self.x_lab - z_lab)*(self.x_lab - z_lab), axis=1), axis=0)
-			cost_reconstruction_unlab = T.mean(T.sum((self.x_unlab - z_unlab)*(self.x_unlab - z_unlab), axis=1), axis=0)
+			cost_reconstruction_lab = T.mean(T.mean((self.x_lab - z_lab)*(self.x_lab - z_lab), axis=1), axis=0)
+			cost_reconstruction_unlab = T.mean(T.mean((self.x_unlab - z_unlab)*(self.x_unlab - z_unlab), axis=1), axis=0)
 
 		preds = self.softmaxLayer.predict(out_lab)
 		accuracy = self.softmaxLayer.calcAccuracy(out_lab, self.y_lab)
@@ -484,7 +493,7 @@ class  SSCAELayer(SSDAELayer):
 		preds_lab = self.softmaxLayer.predict(out_lab)
 		# alpha=0
 		beta=1
-		alpha = 100
+		alpha = 30
 		lamda = 0.1 
 		if self.activation == 'sigmoid':
 			crl = -T.sum(self.x_lab * T.log(z_lab) + (1 - self.x_lab) * T.log(1-z_lab), axis=1) 

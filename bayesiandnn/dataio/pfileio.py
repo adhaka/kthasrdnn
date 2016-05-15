@@ -9,7 +9,7 @@ import struct
 from data_utils import *
 
 
-# bad hack should be fixed
+SEED = 12342
 
 class PfileIO(object):
 
@@ -26,7 +26,7 @@ class PfileIO(object):
 		self.label_start_column = 442
 		self.num_labels = 1
 
-		self.partition_value = 1024*1024*60
+		self.partition_value = 1024*1024*600
 		self.total_frame_num = 0
 		self.partition_num = 0
 		self.frame_per_partition = 0
@@ -83,6 +83,7 @@ class PfileIO(object):
 		# divide the data into number of batches
 		self.feat_dim = self.original_feat_dim
 		self.frame_per_partition = 1024*1024*800 / (self.feat_dim *4)
+		print self.frame_per_partition
 		batch_residual = self.frame_per_partition % 256
 		self.frame_per_partition = self.frame_per_partition - batch_residual
 
@@ -146,6 +147,30 @@ class PfileIO(object):
 		self.partition_index = 0
 		self.featsGenerated = True
 		print "number of partitions:"
+
+		# random shuffle here ...
+		self.featFullMat = np.vstack(self.feats)
+		self.labelsFullMat = np.concatenate(self.labels)
+		np.random.seed(seed=SEED)
+		indices = np.arange(self.featFullMat.shape[0])
+		np.random.shuffle(indices)
+		np.random.shuffle(self.featFullMat)
+		np.random.shuffle(self.labels)
+		# self.featFullMat = self.featFullMat[indices]
+		# self.labels = self.labels[indices]
+
+		# feats_shuffled = []
+		# labels_shuffled = []
+		# num_frames_part = int(self.featFullMat.shape[0] / self.partition_num)
+
+		# index = 0
+		# while index < indices:
+		# 	feats_frame = self.featFullMat[index:index + num_frames_part,:]
+		# 	labels_frame = self.labels[index:index + num_frames_part]
+		# 	feats_shuffled.append(feats_frame)
+		# 	labels_shuffled.append(labels_frame)
+		# 	index = index+ num_frames_part 
+			
 		# print len(self.feats)
 
 

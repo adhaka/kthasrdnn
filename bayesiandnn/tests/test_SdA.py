@@ -15,7 +15,7 @@ from theano.tensor.shared_randomstreams import RandomStreams
 
 
 BATCH_SIZE = 400
-NUM_EPOCHS = 200
+NUM_EPOCHS = 80
 mnist = mnist.load_mnist_theano('mnist.pkl.gz')
 
 
@@ -31,8 +31,8 @@ theano_rng = RandomStreams(numpy_rng.randint( 2**30 ))
 # nn_ae = DNN(numpy_rng, [1024, 1024], 429, 144)
 # configuration for mnist
 
-nn_ae = DNN(numpy_rng, [5096,  5096], 784, 10)
-ae1 = SdA(train_set_x, numpy_rng, theano_rng, [5096, 5096, 5096], nn_ae, ['tanh', 'tanh', 'tanh'])
+nn_ae = DNN(numpy_rng, [3000, 3000], 784, 10)
+ae1 = SdA(train_set_x, numpy_rng, theano_rng, [3000, 3000], nn_ae, mode='contractive', activations_layers=['tanh', 'tanh', 'tanh'])
 
 pretrain_fns = ae1.pretraining_functions(train_set_x, BATCH_SIZE)
 
@@ -52,6 +52,6 @@ for i in xrange(len(ae1.da_layers)):
 		print "pretraining reconstruction error:",i, epoch, np.mean(c)
 
 
-bsgd(nn_ae, mnist, epochs=30)
+bsgd(nn_ae, mnist, epochs=70, percent_data=0.012)
 
 

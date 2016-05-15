@@ -20,22 +20,19 @@ class HiddenLayer(object):
 		if init_w :
 			self.w = init_w
 		else:
-			self.w = theano.shared(
-            	value=np.asarray(
-                	rng.uniform(
-                    	low=-6*np.sqrt(6. / (n_inputs + n_outputs)),
-                    	high=6*np.sqrt(6. / (n_inputs + n_outputs)),
-                    	size=(n_inputs, n_outputs)
-                	),
-                	dtype=theano.config.floatX),
-            	name='w',
-            	borrow=True
-        	)
-		# self.w = theano.shared(value=np.zeros((n_inputs, n_outputs), dtype=theano.config.floatX), name='w', borrow=True)
-
-		# if type(init_w) == 
-
-
+			self.w = theano.shared(value=np.asarray(np.random.randn(n_inputs, n_outputs),dtype=theano.config.floatX),name='w',borrow=True)
+			# self.w = theano.shared(
+   #          	value=np.asarray(
+   #              	rng.uniform(
+   #                  	low=-6*np.sqrt(6. / (n_inputs + n_outputs)),
+   #                  	high=6*np.sqrt(6. / (n_inputs + n_outputs)),
+   #                  	size=(n_inputs, n_outputs)
+   #              	),
+   #              	dtype=theano.config.floatX),
+   #          	name='w',
+   #          	borrow=True
+   #      	)
+# 
 		if init_b:
 			self.b = init_b
 		else:
@@ -151,14 +148,42 @@ class LogisticRegression(object):
 
 
 # hacky way of doing it, but this function collapses the set of 48 phonemes into 39 phonemes.
+# first of all- collapse 144 phonemes hmm states to monophones ...
+#  so 0,1,2 creespond to 0; 3,4,5 correspond to 1, and so on ...
+
 	def calcAccuracyTimitMono(self, X, y):
-		# estimates = self.predict(X)s
-		resultdict = {}
-		num_phonemes = 48
-		num_eval_phonemes = 39
-		estimates = self.predict(X)
-		t1 = estimates.eval()
+		estimates = T.argmax(self.calcProb(X), axis=1)
+		estimates_phones = estimates / 3
+		y_phones = y / 3
+		return T.mean(T.eq(estimates_phones, y_phones))
+
+		# resultdict = {}
+		# num_phonemes = 48
+		# num_eval_phonemes = 39
+		# estimates = self.predict(X)
+		# t1 = estimates.eval()
 		# print t1
+
+# this is a hacky solution ... and just for first iteration ..
+	def calcAccuracyTimitMono39(self, X, y):
+		estimates = T.argmax(self.calcProb(X), axis=1)
+		estimates_phones = estimates / 3
+		y_phones = y / 3
+		direct_accuracy = T.mean(T.eq(estimates, y))
+		reduced_set_accuracy= T.mean(T.eq(estimates_phones, y_phones))
+		# 15 == 28
+		val1 = (T.eq(y_phones, 14) & T.eq(estimates_phones, 27) or (T.eq(y_phones, 27) & T.eq(estimates_phones, 14))).mean(axis=0)
+		# 3 == 6
+		val2 = (T.eq(y_phones, 2) & T.eq(estimates_phones, 5) or (T.eq(y_phones, 5) & T.eq(estimates_phones, 2))).mean(axis=0)
+		val3 = (T.eq(y_phones, 0) & T.eq(estimates_phones, 3) or (T.eq(y_phones, 3) & T.eq(estimates_phones, 0))).mean(axis=0)
+		val4 = (T.eq(y_phones, 22) & T.eq(estimates_phones, 23) or (T.eq(y_phones, 23) & T.eq(estimates_phones, 22))).mean(axis=0)
+		val5 = (T.eq(y_phones, 36) & T.eq(estimates_phones, 47) or (T.eq(y_phones, 47) & T.eq(estimates_phones, 36))).mean(axis=0)
+		val6 = (T.eq(y_phones, 15) & T.eq(estimates_phones, 29) or (T.eq(y_phones, 29) & T.eq(estimates_phones, 15))).mean(axis=0)
+		val7 = (T.eq(y_phones, 37) & T.eq(estimates_phones, 43) or (T.eq(y_phones, 43) & T.eq(estimates_phones, 37))).mean(axis=0)
+		val8 = (T.eq(y_phones, 37) & T.eq(estimates_phones, 16) or (T.eq(y_phones, 16) & T.eq(estimates_phones, 37))).mean(axis=0)
+		val9 = (T.eq(y_phones, 37) & T.eq(estimates_phones, 9) or (T.eq(y_phones, 9) & T.eq(estimates_phones, 37))).mean(axis=0)
+		return reduced_set_accuracy + val1 + val2 + val3 + val4 + val5 + val6 + val7 + val8 + val9
+
 
 
 	def calcAccuracyTimitTri(self,X, y):

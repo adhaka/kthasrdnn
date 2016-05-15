@@ -14,7 +14,7 @@ class DAE(object):
 	This is a denoising auto-encoder single layer. A stacked denoising auto-encoder can be made by stacking together
 	multiple such single layers.
 	'''
-	def __init__(self, numpy_rng, theano_rng, inp, n_inputs, n_hiddens, w, bhid=None, bvis=None, corruption=0.25, activation='sigmoid', kl_div=True):
+	def __init__(self, numpy_rng, theano_rng, inp, n_inputs, n_hiddens, w, bhid=None, bvis=None, corruption=0.2, learning_rate=0.08, activation='sigmoid', kl_div=True):
 		self.numpy_rng = numpy_rng
 		self.n_inputs = n_inputs
 		self.n_hiddens = n_hiddens
@@ -24,6 +24,7 @@ class DAE(object):
 		self.bvis = bvis
 		self.activation = activation
 		self.kl_div = kl_div
+		self.learning_rate = learning_rate
 		print n_inputs, n_hiddens
 
 		if not theano_rng:
@@ -91,7 +92,7 @@ class DAE(object):
 
 
 
-	def get_cost_updates(self, corruption_level=0.30, lr =0.04, momentum=0.3):
+	def get_cost_updates(self, corruption_level=0.15, lr =0.05, momentum=0.3):
 		""" This function computes the cost update after one epoch of training."""
 		corrupted_x = self.get_corrupted_input(self.x, corruption_level)
 		y = self.get_hidden_output(corrupted_x)
@@ -103,15 +104,15 @@ class DAE(object):
 		elif self.activation == 'tanh':
 			cost = T.sum((self.x - z)*(self.x - z), axis=1)
 
-		if self.kl_div:
-			cost = cost + self.kl_divergence(x, z)
+		# if self.kl_div:
+		# 	cost = cost + self.kl_divergence(x, z)
 		cost = T.mean(cost)
 
 		#@TODO: add regularisation term to the cost variable. 
 		# regularise_penalty = l2penalty(self.w)
 
 		gparams = T.grad(cost, wrt=self.params)
-		updates = [(p, p - lr*gp) for p,gp in zip(self.params, gparams)]
+		updates = [(p, p - self.learning_rate*gp) for p,gp in zip(self.params, gparams)]
 		return (cost, updates)
 
 
@@ -131,6 +132,7 @@ class DAE(object):
 
 
 
+
 # contractive auto-encoders
 class CAE(DAE):
 	'''class to implement contractive auto encoders
@@ -138,29 +140,31 @@ class CAE(DAE):
 		hidden layer output with respect to input to the cost term.
 		serves as a single contractive auto-encoder layer.
 	'''
-	def __init__(self, numpy_rng, theano_rng, inp, n_inputs, n_hiddens, w, bhid=None, bvis=None, lambda_constant=0.1, activation='tanh', kl_div=True):
-		super(DAE, self).__init__(numpy_rng, theano_rng, inp, n_inputs, n_hiddens, w, bhid, bvis, corruption=0.0, activation=activation, kl_div=kl_div)
+	def __init__(self, numpy_rng, theano_rng, inp, n_inputs, n_hiddens, w, bhid=None, bvis=None, lambda_constant=0.0010, activation='tanh', kl_div=True):
+		super(CAE, self).__init__(numpy_rng, theano_rng, inp, n_inputs, n_hiddens, w, bhid, bvis, corruption=0.0, activation=activation, kl_div=kl_div)
 		self.lambda_constant = lambda_constant
 
 
-	def get_cost_updates(self, lambda_constant=0.1):
-		self.lambda_constant = 0.1
-		y = self.get_hidden_output(x)
+	def get_cost_updates(self, lr =0.004, momentum=0.3):
+		y = self.get_hidden_output(self.x)
 		z = self.get_reconstructed_output(y)
 		dy = y * (1 - y)
-		dydx = T.dot(dy, self.w.T)
-		frobenius_cost = T.sum((dydx ** 2), axis=1)
+		dy_sq = dy ** 2
+		w_t_sq = self.w.T ** 2
+		dydx = T.dot(dy_sq, w_t_sq)
+		frobenius_cost = T.sum(dydx, axis=1)
 
 		if self.activation == 'sigmoid':
 			cost = -T.sum(self.x * T.log(z) + (1 - self.x) * T.log(1-z), axis=1)
 		elif self.activation == 'tanh':
 			cost = -T.sum((self.x - z)*(self.x - z), axis=1)
 
+		print "lambda constant=", self.lambda_constant
 		cost = cost +  self.lambda_constant * frobenius_cost 
 
 		cost_mean = T.mean(cost)
 
-		gparams = T.grad(cost, wrt=self.params)
+		gparams = T.grad(cost_mean, wrt=self.params)
 		updates = [(p, p - lr*gp) for p,gp in zip(self.params, gparams)]
 		return (cost, updates)
 

@@ -4,7 +4,7 @@ import theano
 import theano.tensor as T 
 import math
 from layers.HiddenLayer import HiddenLayer, LogisticRegression
-from layers.DAE import DAE 
+from layers.DAE import DAE, CAE 
 from theano.tensor.shared_randomstreams import RandomStreams
 
 
@@ -13,7 +13,7 @@ from theano.tensor.shared_randomstreams import RandomStreams
 #  but if we have both of them, then the dnn configuration will take precedence.
 
 class SdA(object):
-	def __init__(self, inp, numpy_rng, theano_rng=None, hidden_layer=None, dnn=None, activations_layers=None):
+	def __init__(self, inp, numpy_rng, theano_rng=None, hidden_layer=None, dnn=None, mode='denoising', activations_layers=None):
 		self.numpy_rng = numpy_rng
 		self.hidden_layer = hidden_layer
 		self.theano_rng = theano_rng
@@ -23,6 +23,7 @@ class SdA(object):
 			theano_rng = RandomStreams(numpy_rng.randint( 2 ** 30))
 		self.da_layers = []
 		self.params = []
+		self.mode = mode
 
 		self.x = T.matrix('x')
 		self.x = inp
@@ -37,18 +38,22 @@ class SdA(object):
 
 		self.hidden_layer_size = len(self.hidden_layer)
 		layer_x = self.x
-		n_input = layer_x.get_value().shape[1]
+		n_inputs = layer_x.get_value().shape[1]
 
 		for i, l in enumerate(hidden_layer):
 			if i > 0:
 				layer_x = dnn.layers[i-1].output(layer_x)
-				n_input = self.hidden_layer[i-1]
+				n_inputs= self.hidden_layer[i-1]
 			
 			activation_fn = activations_layers[i]
 
 			w = dnn.layers[i].w
 			bhid = dnn.layers[i].b
-			da = DAE(numpy_rng=numpy_rng, theano_rng=theano_rng, inp=layer_x, n_inputs=n_input, n_hiddens=l, w=w, bhid=bhid, activation=activation_fn)
+
+			if mode == 'denoising':
+				da = DAE(numpy_rng=numpy_rng, theano_rng=theano_rng, inp=layer_x, n_inputs=n_inputs, n_hiddens=l, w=w, bhid=bhid, activation=activation_fn)
+			elif mode == 'contractive':
+				da = CAE(numpy_rng=numpy_rng, theano_rng=theano_rng, inp=layer_x, n_inputs=n_inputs, n_hiddens=l, w=w, bhid=bhid, activation=activation_fn)
 			self.da_layers.append(da)
 			self.params = self.params + da.params
 
