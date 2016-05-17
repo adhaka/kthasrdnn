@@ -1,5 +1,5 @@
 # @author:Akash
-# @package:bayesiandnn
+# @package:tmhasrdnn
 
 
 import numpy as np 
@@ -20,18 +20,18 @@ class HiddenLayer(object):
 		if init_w :
 			self.w = init_w
 		else:
-			self.w = theano.shared(value=np.asarray(np.random.randn(n_inputs, n_outputs),dtype=theano.config.floatX),name='w',borrow=True)
-			# self.w = theano.shared(
-   #          	value=np.asarray(
-   #              	rng.uniform(
-   #                  	low=-6*np.sqrt(6. / (n_inputs + n_outputs)),
-   #                  	high=6*np.sqrt(6. / (n_inputs + n_outputs)),
-   #                  	size=(n_inputs, n_outputs)
-   #              	),
-   #              	dtype=theano.config.floatX),
-   #          	name='w',
-   #          	borrow=True
-   #      	)
+			# self.w = theano.shared(value=np.asarray(np.random.randn(n_inputs, n_outputs),dtype=theano.config.floatX),name='w',borrow=True)
+			self.w = theano.shared(
+            	value=np.asarray(
+                	rng.uniform(
+                    	low=-6*np.sqrt(6. / (n_inputs + n_outputs)),
+                    	high=6*np.sqrt(6. / (n_inputs + n_outputs)),
+                    	size=(n_inputs, n_outputs)
+                	),
+                	dtype=theano.config.floatX),
+            	name='w',
+            	borrow=True
+        	)
 # 
 		if init_b:
 			self.b = init_b

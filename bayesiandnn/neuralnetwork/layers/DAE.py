@@ -1,3 +1,6 @@
+# @author:Akash
+# @package:tmhasrdnn
+
 import numpy as np
 import os
 import theano
@@ -14,7 +17,7 @@ class DAE(object):
 	This is a denoising auto-encoder single layer. A stacked denoising auto-encoder can be made by stacking together
 	multiple such single layers.
 	'''
-	def __init__(self, numpy_rng, theano_rng, inp, n_inputs, n_hiddens, w, bhid=None, bvis=None, corruption=0.2, learning_rate=0.08, activation='sigmoid', kl_div=True):
+	def __init__(self, numpy_rng, theano_rng, inp, n_inputs, n_hiddens, w, bhid=None, bvis=None, corruption=0.2, learning_rate=0.01, activation='sigmoid', kl_div=True):
 		self.numpy_rng = numpy_rng
 		self.n_inputs = n_inputs
 		self.n_hiddens = n_hiddens
@@ -92,7 +95,7 @@ class DAE(object):
 
 
 
-	def get_cost_updates(self, corruption_level=0.15, lr =0.05, momentum=0.3):
+	def get_cost_updates(self, corruption_level=0.15, lr =0.01, momentum=0.3):
 		""" This function computes the cost update after one epoch of training."""
 		corrupted_x = self.get_corrupted_input(self.x, corruption_level)
 		y = self.get_hidden_output(corrupted_x)
@@ -140,8 +143,8 @@ class CAE(DAE):
 		hidden layer output with respect to input to the cost term.
 		serves as a single contractive auto-encoder layer.
 	'''
-	def __init__(self, numpy_rng, theano_rng, inp, n_inputs, n_hiddens, w, bhid=None, bvis=None, lambda_constant=0.0010, activation='tanh', kl_div=True):
-		super(CAE, self).__init__(numpy_rng, theano_rng, inp, n_inputs, n_hiddens, w, bhid, bvis, corruption=0.0, activation=activation, kl_div=kl_div)
+	def __init__(self, numpy_rng, theano_rng, inp, n_inputs, n_hiddens, w, bhid=None, bvis=None, learning_rate=0.01, lambda_constant=0.10, activation='tanh', kl_div=True):
+		super(CAE, self).__init__(numpy_rng, theano_rng, inp, n_inputs, n_hiddens, w, bhid, bvis, learning_rate=learning_rate, corruption=0.0, activation=activation, kl_div=kl_div)
 		self.lambda_constant = lambda_constant
 
 

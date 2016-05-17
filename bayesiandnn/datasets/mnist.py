@@ -1,5 +1,5 @@
 # author:akash
-# package:bayesiandnn
+# package:tmhasrdnn
 
 
 import cPickle, gzip

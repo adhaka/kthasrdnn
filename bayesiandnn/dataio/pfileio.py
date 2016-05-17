@@ -1,3 +1,6 @@
+# @author:Akash
+# @package:tmhasrdnn
+
 import numpy as np 
 import os
 import cPickle, gzip
@@ -26,7 +29,7 @@ class PfileIO(object):
 		self.label_start_column = 442
 		self.num_labels = 1
 
-		self.partition_value = 1024*1024*600
+		self.partition_value = 1024*1024*400
 		self.total_frame_num = 0
 		self.partition_num = 0
 		self.frame_per_partition = 0
@@ -90,7 +93,7 @@ class PfileIO(object):
 
 
 
-	def readPfile(self, left=5, right =5):
+	def readPfile(self, left=5, right =5, randomise=False):
 		self.dtype = np.dtype({'names':['d', 'l'],
 								'formats':[('>f', self.original_feat_dim), '>i'],
 								'offsets': [self.feat_start_column * 4, self.label_start_column * 4]})
@@ -152,26 +155,23 @@ class PfileIO(object):
 		self.featFullMat = np.vstack(self.feats)
 		self.labelsFullMat = np.concatenate(self.labels)
 		np.random.seed(seed=SEED)
-		indices = np.arange(self.featFullMat.shape[0])
-		np.random.shuffle(indices)
+		#indices = np.arange(self.featFullMat.shape[0])
+		#np.random.shuffle(indices)
 		np.random.shuffle(self.featFullMat)
-		np.random.shuffle(self.labels)
-		# self.featFullMat = self.featFullMat[indices]
-		# self.labels = self.labels[indices]
-
-		# feats_shuffled = []
-		# labels_shuffled = []
-		# num_frames_part = int(self.featFullMat.shape[0] / self.partition_num)
-
-		# index = 0
-		# while index < indices:
-		# 	feats_frame = self.featFullMat[index:index + num_frames_part,:]
-		# 	labels_frame = self.labels[index:index + num_frames_part]
-		# 	feats_shuffled.append(feats_frame)
-		# 	labels_shuffled.append(labels_frame)
-		# 	index = index+ num_frames_part 
-			
-		# print len(self.feats)
+		np.random.seed(seed=SEED)
+		np.random.shuffle(self.labelsFullMat)
+	
+		self.finalfeats = []
+		self.finallabels = []
+		rows_per_partition = int(self.featFullMat.shape[0] / self.partition_num)
+		for i in xrange(self.partition_num):
+			self.finalfeats.append(self.featFullMat[i*rows_per_partition:(i+1)*rows_per_partition])
+			self.finallabels.append(self.labelsFullMat[i*rows_per_partition:(i+1)*rows_per_partition])
+		
+		if randomise:
+			self.labels = self.finallabels
+			self.feats = self.finalfeats
+		
 
 
 

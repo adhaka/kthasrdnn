@@ -1,4 +1,5 @@
-
+# @author:Akash
+# @package:tmhasrdnn
 
 import numpy as np 
 import cPickle, gzip
@@ -16,7 +17,7 @@ from dataio.pfileio import PfileIO
 # 
 
 sys.path.append('~/masters-thesis/bayesiandnn/bayesiandnn/datasets/rawdata')
-
+SEED = 139589
 
 def _load_raw_data(datapath):
 	dirpath, filename = os.path.split(datapath)
@@ -36,15 +37,18 @@ def _load_raw_data(datapath):
 
 
 
-def readTIMIT(datapath='timit-mfcc-mono-tr.pfile.gz', format='pfile', shared=False, listify=False, mapping=48):
+def readTIMIT(datapath='timit-mfcc-mono-tr.pfile.gz', format='pfile', shared=False, listify=False, mapping=48, percent_data=1., randomise=False):
 	file_reader = PfileIO(datapath)
 	file_reader.readpfileInfo()
-	file_reader.readPfile()
+	file_reader.readPfile(randomise=randomise)
 	x, y = file_reader.generate_features(listify)
 
+	if percent_data < 1. :
+		x, y = partition_data(x, y, percent_data)
+
 	# stats = Counter(y)
-	# def divideby3(s):
 	if mapping == 48:
+	# if y is a list, then iterate otherwise apply function once.	
 		if isinstance(y, (list, tuple)) :
 			y = map(lambda x: map_y_48(x), y)
 		else:	
@@ -54,7 +58,6 @@ def readTIMIT(datapath='timit-mfcc-mono-tr.pfile.gz', format='pfile', shared=Fal
 			y = map(lambda x: map_y_39(x), y)
 		else:	
 			y = map_y_39(y)
-	
 
 	# print stats.most_common(100)
 	if shared == True:
@@ -62,6 +65,36 @@ def readTIMIT(datapath='timit-mfcc-mono-tr.pfile.gz', format='pfile', shared=Fal
 	
 	return x, y
 
+
+def readTIMITSSL(datapath='timit-mfcc-mono-tr.pfile.gz', format='pfile', shared=False, listify=False, mapping=48, percent_data=0.99, randomise=True):
+	file_reader = PfileIO(datapath)
+	file_reader.readpfileInfo()
+	file_reader.readPfile(randomise=randomise)
+	x, y = file_reader.generate_features(listify)
+	if isinstance(x, (list, tuple)):
+		xmat = np.vstack(x)
+		ymat = np.concatenate(y)
+		x = xmat
+		y = ymat
+
+	total_samples = xmat.shape[0]
+	total_labels = int(percent_data*total_samples)
+	x_lab = x[:total_labels]
+	if mapping == 48:
+		if isinstance(y, (list, tuple)):
+			y = map(lambda x:map_y_48(x), y)
+		else:
+			y = map_y_48(y)
+	elif mapping = 39
+		if isinstance(y, (list, tuple)):
+			y = map(lambda x:map_y_39(x), y)
+		else:
+			y = map_y_39(y)
+
+
+	y_lab = y[:total_labels]
+	x_unlab = x[total_labels:]
+	return x_lab, y_lab, x_unlab  
 
 
 # to seperate the data into training, test and validation sets.
@@ -150,9 +183,45 @@ def map_y_39(y):
         return y_39
 
 
+def partition_data(x, y, percent_data, max_partitions=1):
+	if isinstance(x, (list, tuple)):
+		xmat = np.vstack(x)
+		ymat = np.concatenate(y)
+		x = xmat
+		y = ymat
+
+	num_samples = xmat.shape[0]
+	num_labels = int(percent_data * num_samples)
+	print "number of frames used in training:", num_labels
+	# x_lab	
+	x_lab = x[:num_labels]
+	y_lab = y[:num_labels]
+	x_unlab = x[num_labels:]
+	x_lab = [x_lab]
+	y_lab = [y_lab]
+	return [x_lab, y_lab]
 
 
 
+
+def partition_data_ssl(x, y, percent_data, max_partitions=1):
+	if isinstance(x, (list, tuple)):
+		xmat = np.vstack(x)
+		ymat = np.concatenate(y)
+		x = xmat
+		y = ymat
+
+	num_samples = xmat.shape[0]
+	num_labels = int(percent_data * num_samples)
+	# x_lab	
+	x_lab = x[:num_labels]
+	y_lab = y[:num_labels]
+	x_unlab = x[num_labels:]
+
+	
+	return [x_lab, y_lab, x_unlab]	
+
+	# x_f = x[:]
 
 
 
