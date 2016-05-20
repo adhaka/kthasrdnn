@@ -40,7 +40,7 @@ class SSDAE(object):
 		self.y_lab_np = y_lab_np
 
 		# y with one of K encoding ....
-		self.y_lab_np_1_K = utils.one_of_K_encoding(y_lab_np, num_classes=10)
+		# self.y_lab_np_1_K = utils.one_of_K_encoding(y_lab_np, num_classes=10)
 
 		self.x_lab = T.matrix('x_lab')
 		self.x_unlab = T.matrix('x_unlab')
@@ -135,9 +135,13 @@ class SSDAE(object):
 
 
 # this function does the complete training for the network. single point function.
-	def trainSGD(self):
+	def trainSGD(self, epochs=3):
+
+		# if epochs is just a single value, use it for all the layers combined ....
+		if not isinstance(epochs, (list, tuple)):
+			epochs = epochs * len(self.hidden_layers)		
 		self.num_batches = int(self.num_samples / self.batch_size)
-		NUM_EPOCHS = [160, 1, 1]
+		NUM_EPOCHS = epochs
 		x_lab_shared = self._shared_dataset(self.x_lab_np)
 		x_unlab_shared = self._shared_dataset(self.x_unlab_np)
 		y_lab_shared = self._shared_dataset_y(self.y_lab_np)
@@ -201,20 +205,20 @@ class SSDAE(object):
 
 
 
-	def trainSGDSupervised(self):
+	def trainSGDSupervised(self, train_set_x, train_set_y, valid_set_x, valid_set_y, test_set_x, test_set_y):
 		# dnn = DNN(self.numpy_rng, [self.hidden_layers[-1]], self.hidden_layers[-1], 10, w_layers=[self.layers[0].encoder.get_weight()], b_layers=[self.layers[0].encoder.get_bias()])
-		
+		# dnn = DNN(self.numpy_rng, [self.hidden_layers[0]], self.hidden_layers[0], 10, w_layers=[self.layers[0].encoder.get_weight()], b_layers=[self.layers[0].encoder.get_bias()])
 		# mnist_data = mnist.load_mnist_theano('mnist.pkl.gz')
 		# Hl = HiddenLayer(self.numpy_rng, self.input_size, self.hidden_layers[0], init_w=self.layers[0].get_weight(), init_b=self.layers[0].get_bias(), activation='tanh')
 		mnist_data = mnist.load_mnist_numpy('mnist.pkl.gz')
 		print "............... Final training starts now ........."
 		# bsgd(dnn, mnist_data, epochs=40)
 
-		train_set_x, train_set_y = mnist_data[0]
-		valid_set_x, valid_set_y = mnist_data[1]
-		test_set_x, test_set_y = mnist_data[2]
+		# train_set_x, train_set_y = mnist_data[0]
+		# valid_set_x, valid_set_y = mnist_data[1]
+		# test_set_x, test_set_y = mnist_data[2]
 
-		train_set_x, train_set_y = train_set_x[:600,:], train_set_y[:600]
+		# train_set_x, train_set_y = train_set_x[:600,:], train_set_y[:600]
 		batch_size = 300
 		epochs = 240
 
@@ -225,18 +229,18 @@ class SSDAE(object):
 		print train_set_x.shape, self.layers[0].get_weight().shape
 		z1_np = np.tanh(np.dot(train_set_x, self.layers[0].get_weight()) + self.layers[0].get_bias())
 		z2_np = np.tanh(np.dot(z1_np, self.layers[1].get_weight()) + self.layers[1].get_bias())
-		z3_np = np.tanh(np.dot(z2_np, self.layers[2].get_weight()) + self.layers[2].get_bias())
+		# z3_np = np.tanh(np.dot(z2_np, self.layers[2].get_weight()) + self.layers[2].get_bias())
 		z1_valid_np = np.tanh(np.dot(valid_set_x, self.layers[0].get_weight()) + self.layers[0].get_bias())
 		z2_valid_np = np.tanh(np.dot(z1_valid_np, self.layers[1].get_weight()) + self.layers[1].get_bias())
-		z3_valid_np = np.tanh(np.dot(z2_valid_np, self.layers[2].get_weight()) + self.layers[2].get_bias())
+		# z3_valid_np = np.tanh(np.dot(z2_valid_np, self.layers[2].get_weight()) + self.layers[2].get_bias())
 		z1_test_np = np.tanh(np.dot(test_set_x, self.layers[0].get_weight()) + self.layers[0].get_bias())
 		z2_test_np = np.tanh(np.dot(z1_test_np, self.layers[1].get_weight()) + self.layers[1].get_bias())
-		z3_test_np = np.tanh(np.dot(z2_test_np, self.layers[2].get_weight()) + self.layers[2].get_bias())
+		# z3_test_np = np.tanh(np.dot(z2_test_np, self.layers[2].get_weight()) + self.layers[2].get_bias())
 
 
 		z1 = self.layers[0].encoder.output(x_final)
 		z2 = self.layers[1].encoder.output(z1)
-		z3 = self.layers[2].encoder.output(z2)
+		# z3 = self.layers[2].encoder.output(z2)
 
 		def get_shared(x, borrow=True):
 			x_shared = theano.shared(np.asarray(x, dtype=x.dtype), borrow=borrow)
@@ -244,10 +248,10 @@ class SSDAE(object):
 
 
 		def get_shared_int(y, borrow=True):
-			y_shared = theano.shared(np.asarray(y, dtype=y.dtype), borrow=borrow)
+			y_shared = theano.shared(np.asarray(y), borrow=borrow)
 			return T.cast(y_shared, 'int32')
 
-		print z3_np.shape
+		# print z3_np.shape
 		train_set_x_shared = get_shared(train_set_x)
 		train_set_z_shared = get_shared(z1_np)
 		valid_set_x_shared = get_shared(valid_set_x)

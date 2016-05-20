@@ -5,11 +5,12 @@ import theano.tensor as T
 from theano.tensor.shared_randomstreams import RandomStreams 
 
 
+# move it to layers folder later .. 
 class SSDAELayer(object):
 
 	# class variable to keep track of layers created 
 	__layer_nums = count(0)
-	def __init__(self, numpy_rng, theano_rng, n_inputs, n_outputs, n_targets, x_lab=None, x_unlab=None, y_lab=None, learning_rate = 0.014, corruption=0.20, batch_size=400, tied=False, activation='tanh'):
+	def __init__(self, numpy_rng, theano_rng, n_inputs, n_outputs, n_targets, x_lab=None, x_unlab=None, y_lab=None, learning_rate = 0.016, corruption=0.20, batch_size=400, tied=False, activation='tanh'):
 		self.numpy_rng = numpy_rng
 		self.theano_rng = theano_rng
 		self.n_inputs = n_inputs
@@ -85,8 +86,8 @@ class SSDAELayer(object):
 		preds_lab = self.softmaxLayer.predict(out_lab)
 		self.preds_lab = preds_lab
 		# alpha=0
-		beta=1
-		alpha = 10
+		beta=1000
+		alpha = 3
 		lr = Learning_Rate_Linear_Decay(start_rate=0.02)
 
 		# accuracy = self.softmaxLayer.calcAccuracy(out_lab, y_lab)
@@ -95,10 +96,10 @@ class SSDAELayer(object):
 		if self.activation == 'sigmoid':
 			crl = -T.sum(self.x_lab * T.log(z_lab) + (1 - self.x_lab) * T.log(1 - z_lab), axis=1)
 			cost_reconstruction_lab = T.mean(crl)
-			cost_reconstruction_unlab = T.mean(-T.sum(self.x_unlab * T.log(z_unlab) + (1 - self.x_unlab) * T.log(1-z_unlab), axis=1))
+			cost_reconstruction_unlab = T.mean(-T.mean(self.x_unlab * T.log(z_unlab) + (1 - self.x_unlab) * T.log(1-z_unlab), axis=1))
 		elif self.activation == 'tanh':
-			cost_reconstruction_lab = T.mean(T.sum((self.x_lab - z_lab)*(self.x_lab - z_lab), axis=1), axis=0)
-			cost_reconstruction_unlab = T.mean(T.sum((self.x_unlab - z_unlab)*(self.x_unlab - z_unlab), axis=1), axis=0)
+			cost_reconstruction_lab = T.mean(T.mean((self.x_lab - z_lab)*(self.x_lab - z_lab), axis=1), axis=0)
+			cost_reconstruction_unlab = T.mean(T.mean((self.x_unlab - z_unlab)*(self.x_unlab - z_unlab), axis=1), axis=0)
 
 		preds = self.softmaxLayer.predict(out_lab)
 		accuracy = self.softmaxLayer.calcAccuracy(out_lab, self.y_lab)
@@ -171,5 +172,71 @@ class SSDAELayer(object):
 		error = enc_out * ( 1- enc_out)				
 		We = We - eta * T.dot(x.T , error)
 		return We
+
+
+
+
+
+# semi-supervised contractive auto-encoder
+class  SSCAELayer(SSDAELayer):
+	''' This class represents one single  layer of Semi-Supervised 
+	contractive auto-encoder , which can be stacked to gether to form 
+	a contractive auto encoder whose objective will be a sum of the reconstruction 
+	error and cross entropy loss and an additional term corresponfing to the frobenius norm
+	of the jacbobian.
+	'''
+	def __init__(self, numpy_rng, theano_rng, n_inputs, n_outputs, n_targets, x_lab=None, x_unlab=None, y_lab=None, learning_rate = 0.07, corruption=0.20, batch_size=400, tie=False, activation='tanh'):
+		super(SSCAELayer, self).__init__(numpy_rng, theano_rng, n_inputs, n_outputs, n_targets, x_lab, x_unlab, y_lab, learning_rate, corruption, batch_size, tie, activation)		
+
+
+
+	def get_cost_updates(self):
+		out_unlab = self.encoder.output(self.x_unlab)
+		out_lab = self.encoder.output(self.x_lab)
+		z_unlab = self.decoder.output(out_unlab)
+		z_lab = self.decoder.output(out_lab)
+		preds_lab = self.softmaxLayer.predict(out_lab)
+		# alpha=0
+		beta=1
+		alpha = 30
+		lamda = 0.1 
+		if self.activation == 'sigmoid':
+			crl = -T.sum(self.x_lab * T.log(z_lab) + (1 - self.x_lab) * T.log(1-z_lab), axis=1) 
+			dh_lab = out_lab * (1 - out_lab) 
+			dh_unlab = out_unlab * (1 - out_unlab)
+			dhdx_lab = T.dot(dh_lab, self.encoder.w.T)
+			dhdx_unlab = T.dot(dh_unlab, self.encoder.w.T)
+			frobenius_cost_lab = lamda * T.sum((dhdx_lab ** 2), axis=1)
+			frobenius_cost_unlab = lamda * T.sum((dhdx_unlab **2), axis=1)
+			cost_reconstruction_lab = T.mean(crl + frobenius_cost_lab)
+			crul = -T.sum(self.x_unlab * T.log(z_unlab) + (1 - self.x_unlab) * T.log(1-z_unlab), axis=1)
+			cost_reconstruction_unlab = T.mean(crul + frobenius_cost_unlab)
+
+		elif self.activation == 'tanh':
+			dh_lab = out_lab * (1 - out_lab) 
+			dh_unlab = out_unlab * (1 - out_unlab)
+			dhdx_lab = T.dot(dh_lab, self.encoder.w.T)
+			dhdx_unlab = T.dot(dh_unlab, self.encoder.w.T)
+			frobenius_cost_lab = lamda * T.sum((dhdx_lab ** 2), axis=1)
+			frobenius_cost_unlab = lamda * T.sum((dhdx_unlab **2), axis=1)
+			crl = T.sum((self.x_lab - z_lab)*(self.x_lab - z_lab), axis=1)
+			crul = T.sum((self.x_unlab - z_unlab)*(self.x_unlab - z_unlab), axis=1)
+			cost_reconstruction_lab = T.mean(crl + frobenius_cost_lab)
+			cost_reconstruction_unlab = T.mean(crul + frobenius_cost_unlab)
+
+		preds = self.softmaxLayer.predict(out_lab)
+		cost_classification = self.softmaxLayer.cost(out_lab, self.y_lab)
+
+		cost1 = beta * (cost_reconstruction_lab + cost_reconstruction_unlab) 
+		cost2 = alpha * cost_classification
+		cost = cost1 + cost2 
+
+		updates = OrderedDict()
+		gparams = T.grad(cost, wrt=self.paramsAll)
+		# gparams2 = T.grad(cost2, wrt=self.paramsAll)
+		for p, gp in zip(self.paramsAll, gparams):
+			updates[p] = p - gp*self.learning_rate
+
+		return [cost, cost1, cost_classification, preds, updates]
 
 

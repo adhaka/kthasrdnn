@@ -1,3 +1,6 @@
+# @author:Akash
+# @package:tmhasrdnn
+
 import numpy as np
 import cPickle, gzip
 import theano
@@ -51,9 +54,9 @@ class SdA(object):
 			bhid = dnn.layers[i].b
 
 			if mode == 'denoising':
-				da = DAE(numpy_rng=numpy_rng, theano_rng=theano_rng, inp=layer_x, n_inputs=n_inputs, n_hiddens=l, w=w, bhid=bhid, activation=activation_fn)
+				da = DAE(numpy_rng=numpy_rng, theano_rng=theano_rng, inp=layer_x, n_inputs=n_inputs, n_hiddens=l, w=w, bhid=bhid, activation=activation_fn, learning_rate=0.003)
 			elif mode == 'contractive':
-				da = CAE(numpy_rng=numpy_rng, theano_rng=theano_rng, inp=layer_x, n_inputs=n_inputs, n_hiddens=l, w=w, bhid=bhid, activation=activation_fn)
+				da = CAE(numpy_rng=numpy_rng, theano_rng=theano_rng, inp=layer_x, n_inputs=n_inputs, n_hiddens=l, w=w, bhid=bhid, activation=activation_fn, learning_rate=0.005)
 			self.da_layers.append(da)
 			self.params = self.params + da.params
 

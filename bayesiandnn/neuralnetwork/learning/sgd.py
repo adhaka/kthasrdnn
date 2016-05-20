@@ -1,3 +1,5 @@
+# @author:Akash
+# @package:tmhasrdnn
 
 import numpy as np 
 import math
