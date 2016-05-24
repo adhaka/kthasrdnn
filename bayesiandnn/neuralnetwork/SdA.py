@@ -45,7 +45,7 @@ class SdA(object):
 
 		for i, l in enumerate(hidden_layer):
 			if i > 0:
-				layer_x = dnn.layers[i-1].output(layer_x)
+				layer_x = dnn.layers[-1].output(layer_x)
 				n_inputs= self.hidden_layer[i-1]
 			
 			activation_fn = activations_layers[i]

@@ -72,7 +72,7 @@ class Learning_Rate_Constant(Learning_Rate):
 
 # this implements learning rate scheme with linear_decay
 class Learning_Rate_Linear_Decay(Learning_Rate):
-	def __init__(self, start_rate=0.06, end_rate=0.003, decay_rate=0.7, delay_epochs=40, min_error_diff=0.001, tolerance=0.2, early_stopping=True):
+	def __init__(self, start_rate=0.06, end_rate=0.003, decay_rate=0.7, delay_epochs=60, min_error_diff=0.001, tolerance=0.2, early_stopping=True):
 		super(Learning_Rate_Linear_Decay, self).__init__(start_rate)
 		self.end_rate = end_rate
 		self.rate = start_rate

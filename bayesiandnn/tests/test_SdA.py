@@ -14,15 +14,17 @@ from theano.tensor.shared_randomstreams import RandomStreams
 
 
 
-BATCH_SIZE = 400
-NUM_EPOCHS = 80
-mnist = mnist.load_mnist_theano('mnist.pkl.gz')
-
+BATCH_SIZE = 700
+NUM_EPOCHS = 40
+mnist_data = mnist.load_mnist_theano('mnist.pkl.gz', percent_data=0.1)
+mnist_full = mnist.load_mnist_theano('mnist.pkl.gz', percent_data=1.0)
 
 print mnist
-train_set_x, train_set_y = mnist[0]
-valid_set_x, valid_set_y = mnist[1]
-test_set_x, test_set_y = mnist[2]
+# train_set_x, train_set_y = mnist_data[0]
+valid_set_x, valid_set_y = mnist_data[1]
+test_set_x, test_set_y = mnist_data[2]
+
+train_set_x, train_set_y = mnist_full[0]
 
 numpy_rng = np.random.RandomState(1111)
 
@@ -31,8 +33,8 @@ theano_rng = RandomStreams(numpy_rng.randint( 2**30 ))
 # nn_ae = DNN(numpy_rng, [1024, 1024], 429, 144)
 # configuration for mnist
 
-nn_ae = DNN(numpy_rng, [3000, 3000], 784, 10)
-ae1 = SdA(train_set_x, numpy_rng, theano_rng, [3000, 3000], nn_ae, mode='contractive', activations_layers=['tanh', 'tanh', 'tanh'])
+nn_ae = DNN(numpy_rng, [1000, 1000], 784, 10)
+ae1 = SdA(train_set_x, numpy_rng, theano_rng, [500, 500], nn_ae, mode='contractive', activations_layers=['tanh', 'tanh', 'tanh'])
 
 pretrain_fns = ae1.pretraining_functions(train_set_x, BATCH_SIZE)
 
@@ -40,8 +42,8 @@ num_samples = train_set_x.get_value(borrow=True).shape[1]
 num_batches = num_samples / BATCH_SIZE
 indices = np.arange(num_samples, dtype=np.dtype('int32'))
 
-# layer-wise pretraining
 
+# layer-wise pretraining
 for i in xrange(len(ae1.da_layers)):
 	for epoch in xrange(NUM_EPOCHS):
 		c = []
@@ -52,6 +54,6 @@ for i in xrange(len(ae1.da_layers)):
 		print "pretraining reconstruction error:",i, epoch, np.mean(c)
 
 
-bsgd(nn_ae, mnist, epochs=70, percent_data=0.012)
+bsgd(nn_ae, mnist_data, epochs=100, batch_size=100, lr=0.04)
 
 

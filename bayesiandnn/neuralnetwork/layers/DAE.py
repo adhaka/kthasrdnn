@@ -17,7 +17,7 @@ class DAE(object):
 	This is a denoising auto-encoder single layer. A stacked denoising auto-encoder can be made by stacking together
 	multiple such single layers.
 	'''
-	def __init__(self, numpy_rng, theano_rng, inp, n_inputs, n_hiddens, w, bhid=None, bvis=None, corruption=0.2, learning_rate=0.01, activation='sigmoid', kl_div=True):
+	def __init__(self, numpy_rng, theano_rng, inp, n_inputs, n_hiddens, w, bhid=None, bvis=None, corruption=0.1, learning_rate=0.01, activation='sigmoid', kl_div=True):
 		self.numpy_rng = numpy_rng
 		self.n_inputs = n_inputs
 		self.n_hiddens = n_hiddens
@@ -39,8 +39,8 @@ class DAE(object):
 			self.w = theano.shared(
 			value=np.asarray(
 				numpy_rng.uniform(
-					low =-6*np.sqrt(6. / (n_inputs + n_hiddens)),
-					high= 6*np.sqrt(6. / (n_inputs + n_hiddens)),
+					low =-2*np.sqrt(2. / (n_inputs + n_hiddens)),
+					high= 2*np.sqrt(2. / (n_inputs + n_hiddens)),
 					size=(n_inputs, n_hiddens) 
 					),
 					dtype=theano.config.floatX
@@ -95,7 +95,7 @@ class DAE(object):
 
 
 
-	def get_cost_updates(self, corruption_level=0.15, lr =0.01, momentum=0.3):
+	def get_cost_updates(self, corruption_level=0.2, lr =0.05, momentum=0.3):
 		""" This function computes the cost update after one epoch of training."""
 		corrupted_x = self.get_corrupted_input(self.x, corruption_level)
 		y = self.get_hidden_output(corrupted_x)
@@ -143,17 +143,20 @@ class CAE(DAE):
 		hidden layer output with respect to input to the cost term.
 		serves as a single contractive auto-encoder layer.
 	'''
-	def __init__(self, numpy_rng, theano_rng, inp, n_inputs, n_hiddens, w, bhid=None, bvis=None, learning_rate=0.01, lambda_constant=0.10, activation='tanh', kl_div=True):
+	def __init__(self, numpy_rng, theano_rng, inp, n_inputs, n_hiddens, w, bhid=None, bvis=None, learning_rate=0.06, lambda_constant=0.1, activation='tanh', kl_div=True):
 		super(CAE, self).__init__(numpy_rng, theano_rng, inp, n_inputs, n_hiddens, w, bhid, bvis, learning_rate=learning_rate, corruption=0.0, activation=activation, kl_div=kl_div)
 		self.lambda_constant = lambda_constant
 
 
 	def get_cost_updates(self, lr =0.004, momentum=0.3):
+		reg_constant = 0.1
 		y = self.get_hidden_output(self.x)
 		z = self.get_reconstructed_output(y)
 		dy = y * (1 - y)
 		dy_sq = dy ** 2
 		w_t_sq = self.w.T ** 2
+		reg_cost = (self.w ** 2).sum()
+		# reg_cost = T.sum(self.w ** 2)
 		dydx = T.dot(dy_sq, w_t_sq)
 		frobenius_cost = T.sum(dydx, axis=1)
 
@@ -163,7 +166,8 @@ class CAE(DAE):
 			cost = -T.sum((self.x - z)*(self.x - z), axis=1)
 
 		print "lambda constant=", self.lambda_constant
-		cost = cost +  self.lambda_constant * frobenius_cost 
+		# cost = cost +  self.lambda_constant * frobenius_cost 
+		# cost = cost + reg_constant * reg_cost
 
 		cost_mean = T.mean(cost)
 

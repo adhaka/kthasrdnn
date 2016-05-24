@@ -1,5 +1,5 @@
 # @author:Akash
-# @package:bayesiandnn
+# @package:tmhasrdnn
 
 from os import sys, path
 sys.path.append(path.dirname(path.dirname( path.abspath(__file__) ) ) )
@@ -32,47 +32,51 @@ def map_y_39(y):
 	return y_39
 
 
-BATCH_SIZE = 400
-NUM_EPOCHS = 200
+BATCH_SIZE = 300
+NUM_EPOCHS = 61
 # mnist = mnist.load_mnist_theano('mnist.pkl.gz')
-
 numpy_rng = np.random.RandomState(11111)
-
 theano_rng = RandomStreams(numpy_rng.randint( 2**30 ))
 
 # configuration for timit
 
+# read soem percent of data to be used for supervised training....
+train_x, train_y = timit.readTIMIT('timit-mono-mfcc-train.pfile.gz', shared=False, listify=True, mapping=48, randomise=True, percent_data=0.2)
 
-train_x, train_y = timit.readTIMIT('timit-mono-mfcc-train.pfile.gz', shared=False, listify=True)
-valid_x, valid_y = timit.readTIMIT('timit-mono-mfcc-valid.pfile.gz', shared=False, listify=False)
-test_x, test_y = timit.readTIMIT('timit-mono-mfcc-test.pfile.gz', shared=False, listify=False)
+# read almost the full data to be used for unsupervised training .....
+train_x_full, train_y_full = timit.readTIMIT('timit-mono-mfcc-train.pfile.gz', shared=False, listify=True, mapping=48, randomise=True, percent_data=0.99)
+valid_x, valid_y = timit.readTIMIT('timit-mono-mfcc-valid.pfile.gz', shared=False, listify=False, mapping=48)
+test_x, test_y = timit.readTIMIT('timit-mono-mfcc-test.pfile.gz', shared=False, listify=False, mapping=48)
 
+#  stack the list of data to make on single matrix of trianing data ...
 train_x_all = np.vstack(train_x)
 train_y_all = np.hstack(train_y)
-# train_y_all = reduce(lambda x,y:x+y, train_y)
+train_x_unsup = np.vstack(train_x_full)
+train_y_unsup = np.hstack(train_y_full)
+
 train_x_all, train_y_all = timit.shared_dataset((train_x_all, train_y_all))
+train_x_unsup, train_y_unsup = timit.shared_dataset((train_x_unsup, train_y_unsup))
 
 train_y = map(lambda x: map_y_48(x), train_y)
 valid_y, test_y = map_y_48(valid_y), map_y_48(test_y)
-
 
 train_x, train_y  = timit.make_shared_partitions(train_x, train_y)
 valid_x, valid_y = timit.shared_dataset((valid_x, valid_y))
 test_x, test_y = timit.shared_dataset((test_x, test_y))
 
-train_set_x = train_x[0]
+train_set_x = train_x_unsup
 print train_x_all.get_value().shape[0]
 print train_set_x.get_value().shape[0]
 
 # nn_ae = DNN(numpy_rng, [5096, 5096], 429, 144)
-nn_ae = DNN(numpy_rng, [6000, 6000], 429, 39)
-# nn_ae = DNN(numpy_rng, [6096, 6096], 429, 39)
+# nn_ae = DNN(numpy_rng, [6000, 6000], 429, 39)
+nn_ae = DNN(numpy_rng, [7000], 429, 48)
 
-ae1 = SdA(train_x_all, numpy_rng, theano_rng, [6000, 6000], nn_ae, mode='contractive', activations_layers=['tanh', 'tanh', 'tanh'])
+ae1 = SdA(train_x_unsup, numpy_rng, theano_rng, [7000], nn_ae, mode='contractive', activations_layers=['tanh', 'tanh', 'tanh'])
 
-pretrain_fns = ae1.pretraining_functions(train_x_all, BATCH_SIZE)
-num_samples_part = train_set_x.get_value(borrow=True).shape[1]
-num_samples = train_x_all.get_value(borrow=True).shape[1]
+pretrain_fns = ae1.pretraining_functions(train_x_unsup, BATCH_SIZE)
+num_samples_part = train_x_unsup.get_value(borrow=True).shape[1]
+num_samples = train_x_unsup.get_value(borrow=True).shape[1]
 
 num_batches = num_samples / BATCH_SIZE
 indices = np.arange(num_samples, dtype=np.dtype('int32'))
@@ -99,7 +103,7 @@ for i in xrange(num_partitions):
 	train_set_y = train_y[i]
 	train_set_xy = (train_set_x, train_set_y)
 	timit = [train_set_xy, (valid_x, valid_y), (test_x, test_y)]
-	bsgd(nn_ae, timit, epochs=8, lr=0.006)
+	bsgd(nn_ae, timit, epochs=25, lr=0.006)
 
 
 

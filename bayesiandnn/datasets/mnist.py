@@ -41,7 +41,7 @@ def _load_data(dataset):
 
 
 
-def load_mnist_numpy(dataset, binarize=True, shuffle=True):
+def load_mnist_numpy(dataset, binarize=True, shuffle=True, percent_data=1.):
 	train_set, valid_set, test_set = _load_data(dataset)
 	ts_x, ts_y = train_set
 	va_x, va_y = valid_set
@@ -52,7 +52,11 @@ def load_mnist_numpy(dataset, binarize=True, shuffle=True):
 
 	ts_x = ts_x[indices]
 	ts_y = ts_y[indices]
-	
+	num_samples = len(ts_y)
+	used_samples = int(percent_data * num_samples)
+	ts_x = ts_x[:used_samples]
+	ts_y = ts_y[:used_samples]
+
 	# if binarize:
 	# 	ts_y_bin = one_of_K_encoding(ts_y)
 	# 	va_y_bin = one_of_K_encoding(va_y)
@@ -65,11 +69,11 @@ def load_mnist_numpy(dataset, binarize=True, shuffle=True):
 
 
 
-def load_mnist_theano(dataset):
+def load_mnist_theano(dataset, percent_data=1.):
 	# if not os.path.exists(dataset):
 	# 	raise Exception('file path error')
 	# train_set, valid_set, test_set = _load_data(dataset)
-	train_set, valid_set, test_set = load_mnist_numpy(dataset)
+	train_set, valid_set, test_set = load_mnist_numpy(dataset, percent_data=percent_data)
 
 	def shared_dataset(data_xy, borrow = True):
 		data_x, data_y = data_xy

@@ -66,6 +66,8 @@ def readTIMIT(datapath='timit-mfcc-mono-tr.pfile.gz', format='pfile', shared=Fal
 	return x, y
 
 
+
+
 def readTIMITSSL(datapath='timit-mfcc-mono-tr.pfile.gz', format='pfile', shared=False, listify=False, mapping=48, percent_data=0.99, randomise=True):
 	file_reader = PfileIO(datapath)
 	file_reader.readpfileInfo()
@@ -85,12 +87,11 @@ def readTIMITSSL(datapath='timit-mfcc-mono-tr.pfile.gz', format='pfile', shared=
 			y = map(lambda x:map_y_48(x), y)
 		else:
 			y = map_y_48(y)
-	elif mapping = 39
+	elif mapping == 39:
 		if isinstance(y, (list, tuple)):
 			y = map(lambda x:map_y_39(x), y)
 		else:
 			y = map_y_39(y)
-
 
 	y_lab = y[:total_labels]
 	x_unlab = x[total_labels:]

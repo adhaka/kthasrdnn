@@ -21,7 +21,7 @@ from utils import utils
 
 # single point class for implementing semi-supervised training of DNN with autoencoder penalty.
 class SSDAE(object):
-	def __init__(self, numpy_rng, hidden_layers, x_lab_np, y_lab_np, x_unlab_np, alpha=100, batch_size=400, theano_rng=None, activation='tanh'):
+	def __init__(self, numpy_rng, hidden_layers, x_lab_np, y_lab_np, x_unlab_np, alpha=100, batch_size=100, theano_rng=None, activation='tanh'):
 		self.numpy_rng = numpy_rng
 		self.theano_rng = theano_rng
 		self.batch_size = batch_size
@@ -210,7 +210,8 @@ class SSDAE(object):
 		# dnn = DNN(self.numpy_rng, [self.hidden_layers[0]], self.hidden_layers[0], 10, w_layers=[self.layers[0].encoder.get_weight()], b_layers=[self.layers[0].encoder.get_bias()])
 		# mnist_data = mnist.load_mnist_theano('mnist.pkl.gz')
 		# Hl = HiddenLayer(self.numpy_rng, self.input_size, self.hidden_layers[0], init_w=self.layers[0].get_weight(), init_b=self.layers[0].get_bias(), activation='tanh')
-		mnist_data = mnist.load_mnist_numpy('mnist.pkl.gz')
+		# mnist_data = mnist.load_mnist_numpy('mnist.pkl.gz')
+		mnist_data = [(train_set_x, train_set_y), (valid_set_x, valid_set_y), (test_set_x, test_set_y)]
 		print "............... Final training starts now ........."
 		# bsgd(dnn, mnist_data, epochs=40)
 
@@ -219,7 +220,7 @@ class SSDAE(object):
 		# test_set_x, test_set_y = mnist_data[2]
 
 		# train_set_x, train_set_y = train_set_x[:600,:], train_set_y[:600]
-		batch_size = 300
+		batch_size = 100
 		epochs = 240
 
 		x_final = T.matrix('x_final')
@@ -286,6 +287,8 @@ class SSDAE(object):
 		index = T.ivector('index')
 
 		batch_sgd_train_final = theano.function(inputs=[index], outputs=[supervised_cost, supervised_accuracy], updates=updates, givens={x_final: train_set_z_shared[index], y_final:train_set_y_shared[index]})
+
+		# batch_sgd_train_final = theano.function(inputs=[index], outputs=[supervised_cost, supervised_accuracy], updates=updates, givens={x_final: train_set_z_shared[index], y_final:train_set_y_shared[index]})
 
 		batch_sgd_valid_final = theano.function(inputs=[], outputs=[self.logLayer.calcAccuracy(x_final, y_final)], givens={x_final: valid_set_z_shared, y_final:valid_set_y_shared})
 		train_accuracy = []

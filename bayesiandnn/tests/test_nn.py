@@ -14,10 +14,10 @@ from datasets import timit
 
 
 
-mnist = mnist.load_mnist_theano('mnist.pkl.gz')
+mnist = mnist.load_mnist_theano('mnist.pkl.gz', percent_data=0.01)
 print mnist
 
 rng = np.random.RandomState(1111)
-nn = DNN(rng, [3000, 3000], 784, 10)
-bsgd(nn, mnist, epochs=80, percent_data=0.012)
+nn = DNN(rng, [100], 784, 10)
+bsgd(nn, mnist, epochs=90, batch_size=20, lr=0.08)
 

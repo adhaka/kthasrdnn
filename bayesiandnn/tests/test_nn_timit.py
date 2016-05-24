@@ -1,5 +1,5 @@
 # @author:Akash
-# @package:kthtmhdnn
+# @package:tmhasrdnn
 
 from os import sys, path
 sys.path.append(path.dirname(path.dirname( path.abspath(__file__) ) ) )
@@ -21,13 +21,13 @@ theano_rng = RandomStreams(numpy_rng.randint( 2**30 ))
 
 # neural network for monophones 
 # nn = DNN(numpy_rng, [6096, 6096], 429, 144)
-#nn = DNN(numpy_rng, [20096], 429, 48)
-nn = DNN(numpy_rng, [20096], 429, 39)
+nn = DNN(numpy_rng, [10000], 429, 48)
+#nn = DNN(numpy_rng, [10096], 1320, 48)
 MODE = 'usevalid'
 
-train_x, train_y = timit.readTIMIT('timit-mono-mfcc-train.pfile.gz', shared=False, listify=True, mapping=39)
-valid_x, valid_y = timit.readTIMIT('timit-mono-mfcc-valid.pfile.gz', shared=False, listify=False, mapping=39)
-test_x, test_y = timit.readTIMIT('timit-mono-mfcc-test.pfile.gz', shared=False, listify=False, mapping=39)
+train_x, train_y = timit.readTIMIT('timit-mono-mfcc-train.pfile.gz', shared=False, listify=True, mapping=48, percent_data=0.999, randomise=True)
+valid_x, valid_y = timit.readTIMIT('timit-mono-mfcc-valid.pfile.gz', shared=False, listify=False, mapping=48)
+test_x, test_y = timit.readTIMIT('timit-mono-mfcc-test.pfile.gz', shared=False, listify=False, mapping=48)
 
 #train_y = map(lambda x: map_y_48(x), train_y)
 #valid_y, test_y = map_y_48(valid_y), map_y_48(test_y)
@@ -46,7 +46,7 @@ if MODE == 'usevalid':
 		train_set_y = train_y[i]
 		train_set_xy = (train_set_x, train_set_y)
 		timit = [train_set_xy, (valid_x, valid_y), (test_x, test_y)]
-		bsgd(nn, timit, epochs=6, lr=0.008)
+		bsgd(nn, timit, epochs=25, lr=0.008)
 
 else:
 	print len(train_x)
