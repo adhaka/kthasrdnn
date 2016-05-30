@@ -41,7 +41,7 @@ theano_rng = RandomStreams(numpy_rng.randint( 2**30 ))
 # configuration for timit
 
 # read soem percent of data to be used for supervised training....
-train_x, train_y = timit.readTIMIT('timit-mono-mfcc-train.pfile.gz', shared=False, listify=True, mapping=48, randomise=True, percent_data=0.2)
+train_x, train_y = timit.readTIMIT('timit-mono-mfcc-train.pfile.gz', shared=False, listify=True, mapping=48, randomise=True, percent_data=0.10)
 
 # read almost the full data to be used for unsupervised training .....
 train_x_full, train_y_full = timit.readTIMIT('timit-mono-mfcc-train.pfile.gz', shared=False, listify=True, mapping=48, randomise=True, percent_data=0.99)
@@ -70,9 +70,9 @@ print train_set_x.get_value().shape[0]
 
 # nn_ae = DNN(numpy_rng, [5096, 5096], 429, 144)
 # nn_ae = DNN(numpy_rng, [6000, 6000], 429, 39)
-nn_ae = DNN(numpy_rng, [7000], 429, 48)
+nn_ae = DNN(numpy_rng, [2000], 429, 48)
 
-ae1 = SdA(train_x_unsup, numpy_rng, theano_rng, [7000], nn_ae, mode='contractive', activations_layers=['tanh', 'tanh', 'tanh'])
+ae1 = SdA(train_x_unsup, numpy_rng, theano_rng, [2000], nn_ae, mode='contractive', activations_layers=['tanh', 'tanh', 'tanh'])
 
 pretrain_fns = ae1.pretraining_functions(train_x_unsup, BATCH_SIZE)
 num_samples_part = train_x_unsup.get_value(borrow=True).shape[1]
@@ -103,7 +103,7 @@ for i in xrange(num_partitions):
 	train_set_y = train_y[i]
 	train_set_xy = (train_set_x, train_set_y)
 	timit = [train_set_xy, (valid_x, valid_y), (test_x, test_y)]
-	bsgd(nn_ae, timit, epochs=25, lr=0.006)
+	bsgd(nn_ae, timit, epochs=50, lr=0.006)
 
 
 

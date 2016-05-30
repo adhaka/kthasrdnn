@@ -36,7 +36,7 @@ def _load_raw_data(datapath):
 
 
 
-
+ 
 def readTIMIT(datapath='timit-mfcc-mono-tr.pfile.gz', format='pfile', shared=False, listify=False, mapping=48, percent_data=1., randomise=False):
 	file_reader = PfileIO(datapath)
 	file_reader.readpfileInfo()

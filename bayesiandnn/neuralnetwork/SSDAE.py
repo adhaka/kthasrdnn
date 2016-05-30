@@ -21,16 +21,17 @@ from utils import utils
 
 # single point class for implementing semi-supervised training of DNN with autoencoder penalty.
 class SSDAE(object):
-	def __init__(self, numpy_rng, hidden_layers, x_lab_np, y_lab_np, x_unlab_np, alpha=100, batch_size=100, theano_rng=None, activation='tanh'):
+	def __init__(self, numpy_rng, hidden_layers, x_lab_np, y_lab_np, x_unlab_np, alpha=100, beta=3, batch_size=500, theano_rng=None, activation='tanh'):
 		self.numpy_rng = numpy_rng
 		self.theano_rng = theano_rng
 		self.batch_size = batch_size
 		self.hidden_layers = hidden_layers
 		self.alpha = alpha
+		self.beta = beta
 
 		# initializing the alpha values for all the layers ..... 
-		if not isinstance(alpha, list):
-			self.alpha = [alpha] * len(hidden_layers) 
+		# if not isinstance(alpha, list):
+		# 	self.alpha = [alpha] * len(hidden_layers) 
 
 		self.theano_rng = RandomStreams(numpy_rng.randint( 2 ** 30))
 		self.num_layers = len(hidden_layers)
@@ -67,7 +68,7 @@ class SSDAE(object):
 				input_unlab = self.layers[-1].output(input_unlab)
 				input_size = hidden_layers[i-1]
 				output_size = hl
-			ssda = SSDAELayer(numpy_rng, self.theano_rng, input_size, output_size, target_size, x_lab=input_lab, y_lab=out_lab, x_unlab=input_unlab, activation=activation)
+			ssda = SSDAELayer(numpy_rng, self.theano_rng, input_size, output_size, target_size, x_lab=input_lab, y_lab=out_lab, x_unlab=input_unlab, activation=activation, alpha=self.alpha, beta=self.beta)
 			# ssda = SSCAELayer(numpy_rng, self.theano_rng, input_size, output_size, target_size, x_lab=input_lab, y_lab=out_lab, x_unlab=input_unlab, activation=activation)
 			self.layers.append(ssda)
 			self.params = self.params + ssda.params 
@@ -145,8 +146,12 @@ class SSDAE(object):
 		x_lab_shared = self._shared_dataset(self.x_lab_np)
 		x_unlab_shared = self._shared_dataset(self.x_unlab_np)
 		y_lab_shared = self._shared_dataset_y(self.y_lab_np)
+
+		# get pretrining fns for all the layers ....
 		pretrain_fns = self.get_training_functions(x_lab=x_lab_shared, x_unlab=x_unlab_shared, y_lab=y_lab_shared)
-		print self.num_labels, self.num_unlabels
+		print "number of labelled samples is:", self.num_labels
+		print "number of unlabelled samples is:", self.num_unlabels
+
 		indices_lab = np.arange(self.num_labels, dtype=np.dtype('int32'))
 		indices_unlab = np.arange(self.num_unlabels, dtype=np.dtype('int32'))
 		c = []
@@ -163,7 +168,6 @@ class SSDAE(object):
 			la = self.layers[i]
 			wc_np = la.softmaxLayer.w.get_value()
 			print "yay"
-			print np.mean(wc_np[160,:])
 
 			for epoch in xrange(total_epochs):
 				for j in xrange(self.num_batches - 1):
@@ -211,7 +215,6 @@ class SSDAE(object):
 		# mnist_data = mnist.load_mnist_theano('mnist.pkl.gz')
 		# Hl = HiddenLayer(self.numpy_rng, self.input_size, self.hidden_layers[0], init_w=self.layers[0].get_weight(), init_b=self.layers[0].get_bias(), activation='tanh')
 		# mnist_data = mnist.load_mnist_numpy('mnist.pkl.gz')
-		mnist_data = [(train_set_x, train_set_y), (valid_set_x, valid_set_y), (test_set_x, test_set_y)]
 		print "............... Final training starts now ........."
 		# bsgd(dnn, mnist_data, epochs=40)
 
@@ -220,8 +223,8 @@ class SSDAE(object):
 		# test_set_x, test_set_y = mnist_data[2]
 
 		# train_set_x, train_set_y = train_set_x[:600,:], train_set_y[:600]
-		batch_size = 100
-		epochs = 240
+		batch_size = 300
+		epochs = 140
 
 		x_final = T.matrix('x_final')
 		y_final = T.ivector('y_final')
@@ -278,7 +281,7 @@ class SSDAE(object):
 
 		updates = OrderedDict()
 		p_final_grads = [T.grad(cost=supervised_cost, wrt = p) for p in params_supervised] 
-		lr = 0.04
+		lr = 0.06
 
 		for p, gp in zip(params_supervised, p_final_grads):
 			updates[p] = p - lr*gp
@@ -288,9 +291,8 @@ class SSDAE(object):
 
 		batch_sgd_train_final = theano.function(inputs=[index], outputs=[supervised_cost, supervised_accuracy], updates=updates, givens={x_final: train_set_z_shared[index], y_final:train_set_y_shared[index]})
 
-		# batch_sgd_train_final = theano.function(inputs=[index], outputs=[supervised_cost, supervised_accuracy], updates=updates, givens={x_final: train_set_z_shared[index], y_final:train_set_y_shared[index]})
-
 		batch_sgd_valid_final = theano.function(inputs=[], outputs=[self.logLayer.calcAccuracy(x_final, y_final)], givens={x_final: valid_set_z_shared, y_final:valid_set_y_shared})
+		batch_sgd_test_final = theano.function(inputs=[], outputs=[self.logLayer.calcAccuracy(x_final, y_final)], givens={x_final: test_set_z_shared, y_final:test_set_y_shared})
 		train_accuracy = []
 
 		for n in xrange(epochs):
@@ -303,6 +305,7 @@ class SSDAE(object):
 			print "epoch:", n,  " validation accuracy:",  batch_sgd_valid_final()
 			# self.finalLogLayer = LogisticRegression(n_inputs=self.hidden_layers[-1], n_outputs=self.n_outputs, activation='tanh', init_zero=True)
 
+		print "test accuracy:", batch_sgd_test_final()
 
 
 
@@ -312,11 +315,13 @@ class SSDAELayer(object):
 
 	# class variable to keep track of layers created 
 	__layer_nums = count(0)
-	def __init__(self, numpy_rng, theano_rng, n_inputs, n_outputs, n_targets, x_lab=None, x_unlab=None, y_lab=None, learning_rate = 0.016, corruption=0.20, batch_size=400, tied=False, activation='tanh'):
+	def __init__(self, numpy_rng, theano_rng, n_inputs, n_outputs, n_targets, x_lab=None, x_unlab=None, y_lab=None, learning_rate = 0.020, corruption=0.20, batch_size=400, alpha=700, beta=3, tied=False, activation='tanh'):
 		self.numpy_rng = numpy_rng
 		self.theano_rng = theano_rng
 		self.n_inputs = n_inputs
 		self.n_outputs = n_outputs 
+		self.alpha = alpha
+		self.beta = beta
 		self.encoder = HiddenLayer(self.numpy_rng, self.n_inputs, self.n_outputs, activation=activation)
 
 		if tied == True:
@@ -388,8 +393,11 @@ class SSDAELayer(object):
 		preds_lab = self.softmaxLayer.predict(out_lab)
 		self.preds_lab = preds_lab
 		# alpha=0
-		beta=1000
-		alpha = 3
+		beta_range=[1, 10, 100, 200, 500, 800, 1000, 2000, 5000]
+		# beta=700
+		# alpha = 3
+		print "value of alpha is:", self.alpha
+		print "value of beta is:", self.beta
 		lr = Learning_Rate_Linear_Decay(start_rate=0.02)
 
 		# accuracy = self.softmaxLayer.calcAccuracy(out_lab, y_lab)
@@ -406,9 +414,9 @@ class SSDAELayer(object):
 		preds = self.softmaxLayer.predict(out_lab)
 		accuracy = self.softmaxLayer.calcAccuracy(out_lab, self.y_lab)
 		cost_classification = self.softmaxLayer.cost(out_lab, self.y_lab) 
-		cost1 = beta * (cost_reconstruction_lab + cost_reconstruction_unlab) 
-		cost2 = alpha * cost_classification
-		cost = beta * (cost_reconstruction_lab + cost_reconstruction_unlab) + alpha * cost_classification  
+		cost1 = self.beta * (cost_reconstruction_lab + cost_reconstruction_unlab) 
+		cost2 = self.alpha * cost_classification
+		cost = self.beta * (cost_reconstruction_lab + cost_reconstruction_unlab) + self.alpha * cost_classification  
 		# debugprint(cost)
 		# if self.debug_mode == True:
 		# theano.printing.pydotprint(cost, outfile='symbolic_graph_costx' + str(self.layer_num) + '.png', var_with_name_simple=True)
@@ -487,7 +495,7 @@ class  SSCAELayer(SSDAELayer):
 	error and cross entropy loss and an additional term corresponfing to the frobenius norm
 	of the jacbobian.
 	'''
-	def __init__(self, numpy_rng, theano_rng, n_inputs, n_outputs, n_targets, x_lab=None, x_unlab=None, y_lab=None, learning_rate = 0.07, corruption=0.20, batch_size=400, tie=False, activation='tanh'):
+	def __init__(self, numpy_rng, theano_rng, n_inputs, n_outputs, n_targets, x_lab=None, x_unlab=None, y_lab=None, learning_rate = 0.07, corruption=0.20, batch_size=500, tie=False, activation='tanh'):
 		super(SSCAELayer, self).__init__(numpy_rng, theano_rng, n_inputs, n_outputs, n_targets, x_lab, x_unlab, y_lab, learning_rate, corruption, batch_size, tie, activation)		
 
 
