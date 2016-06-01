@@ -167,7 +167,6 @@ class SSDAE(object):
 			total_epochs = NUM_EPOCHS[i]
 			la = self.layers[i]
 			wc_np = la.softmaxLayer.w.get_value()
-			print "yay"
 
 			for epoch in xrange(total_epochs):
 				for j in xrange(self.num_batches - 1):
@@ -211,7 +210,7 @@ class SSDAE(object):
 
 	def trainSGDSupervised(self, train_set_x, train_set_y, valid_set_x, valid_set_y, test_set_x, test_set_y):
 		# dnn = DNN(self.numpy_rng, [self.hidden_layers[-1]], self.hidden_layers[-1], 10, w_layers=[self.layers[0].encoder.get_weight()], b_layers=[self.layers[0].encoder.get_bias()])
-		# dnn = DNN(self.numpy_rng, [self.hidden_layers[0]], self.hidden_layers[0], 10, w_layers=[self.layers[0].encoder.get_weight()], b_layers=[self.layers[0].encoder.get_bias()])
+		dnn = DNN(self.numpy_rng, [self.hidden_layers[0]], self.hidden_layers[0], 10, w_layers=[self.layers[0].encoder.get_weight()], b_layers=[self.layers[0].encoder.get_bias()])
 		# mnist_data = mnist.load_mnist_theano('mnist.pkl.gz')
 		# Hl = HiddenLayer(self.numpy_rng, self.input_size, self.hidden_layers[0], init_w=self.layers[0].get_weight(), init_b=self.layers[0].get_bias(), activation='tanh')
 		# mnist_data = mnist.load_mnist_numpy('mnist.pkl.gz')
@@ -229,6 +228,8 @@ class SSDAE(object):
 		x_final = T.matrix('x_final')
 		y_final = T.ivector('y_final')
 		y_eval = T.ivector('y_eval')
+
+		bsgd(dnn, mnist_data, epochs=25, lr=0.008)
 
 		print train_set_x.shape, self.layers[0].get_weight().shape
 		z1_np = np.tanh(np.dot(train_set_x, self.layers[0].get_weight()) + self.layers[0].get_bias())

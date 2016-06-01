@@ -54,6 +54,6 @@ test_x, test_y = timit.readTIMIT('timit-mono-mfcc-test.pfile.gz', shared=False, 
 # train_x_unlabel = train_y_all[30000:90000,:]
 print valid_x.shape
 
-network = SSDAE(numpy_rng, [8000, 8000], train_x_lab, train_y_lab, train_x_unlab, alpha=alpha, beta=beta)
-network.trainSGD(epochs = [90, 2])
+network = SSDAE(numpy_rng, [7000, 7000], train_x_lab, train_y_lab, train_x_unlab, alpha=alpha, beta=beta)
+network.trainSGD(epochs = [70, 2])
 network.trainSGDSupervised(train_x_lab, train_y_lab, valid_x, valid_y, test_x, test_y)

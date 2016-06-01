@@ -13,7 +13,7 @@ from layers.HiddenLayer import HiddenLayer, LogisticRegression
 # rng represents a random state generated either by numpy or theano
 
 class DNN(object):
-	def __init__(self, rng, hidden_layer, n_in=None, n_out=None, w_layers=None, config=1):
+	def __init__(self, rng, hidden_layer, n_in=None, n_out=None, w_layers=None, b_layers=None, config=1):
 		self.hidden_layer = hidden_layer
 		self.rng = rng
 		self.params = []
@@ -34,10 +34,13 @@ class DNN(object):
 		if w_layers and len(hidden_layer) == len(w_layers):
 			for i in range(len(w_layers)):
 				w_np = w_layers[i]
+				b_np = b_layers[i]
 				print w_np.shape
 				print w_np
 				# exit()
-				# w = theano.shared(value=np.asarray(w_np, dtype=theano.config.floatX), name='We', borrow=True)
+
+				w = theano.shared(value=np.asarray(w_np, dtype=theano.config.floatX), name='We', borrow=True)
+				b = theano.shared(value=np.asarray(b_np, dtype=theano.config.floatX), name='b', borrow=True)
 				# w = theano.shared(
     #         		value=np.asarray(
     #             		rng.uniform(
@@ -50,8 +53,8 @@ class DNN(object):
     #         		borrow=True
     #     		)
 
-				w = theano.shared(value=np.asarray(rng.random(size=(n_inputs, n_outputs)),dtype=theano.config.floatX),name='w',borrow=True)
-				HL = HiddenLayer(self.rng, prev_out, self.n_out, init_w=w)
+				# w = theano.shared(value=np.asarray(rng.random(size=(n_inputs, n_outputs)),dtype=theano.config.floatX),name='w',borrow=True)
+				HL = HiddenLayer(self.rng, prev_out, self.n_out, init_w=w, init_b=b)
 				# prev_out = 
 				self.params += HL.params
 				self.delta_params = self.delta_params + HL.delta_params 
@@ -99,10 +102,10 @@ class DNN(object):
 		return self.opLayer.calcAccuracyTimitMono(estimate, y)
 		
 
-	def calcAccuracyTimitMono39(self, X, y):
-		act = self.forward(X)
-		estimate = act[-1]
-		return self.opLayer.calcAccuracyTimitMono39(estimate, y)
+	# def calcAccuracyTimitMono39(self, X, y):
+	# 	act = self.forward(X)
+	# 	estimate = act[-1]
+	# 	return self.opLayer.calcAccuracyTimitMono39(estimate, y)
 
 
 	def prettyprint(self):

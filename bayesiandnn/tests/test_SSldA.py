@@ -11,6 +11,7 @@ import theano.tensor as T
 from theano.tensor.shared_randomstreams import RandomStreams
 import math
 from utils.utils import one_of_K_encoding
+from utils.utils import get_shared, get_shared_int, shared_dataset
 from neuralnetwork.SSDAE import SSDAE
 from datasets import mnist
 
@@ -50,7 +51,16 @@ train_x_unlabel = train_set_x[3000:50000,:]
 # train_x_unlabel = np.zeros((1000, train_x_label.shape[1]), dtype='float32')
 network = SSDAE(numpy_rng, [3000, 3000], train_x_label, train_y_label, train_x_unlabel)
 # train_fns = network.get_training_functions()
-network.trainSGD(epochs=[100, 1])
+
+network.trainSGD(epochs=[1, 1])
+
+train_x_label = get_shared(train_x_label)
+valid_set_x = get_shared(valid_set_x)
+test_set_x = get_shared(valid_set_y)
+train_y_label = get_shared_int(train_y_label)
+valid_set_y = get_shared_int(valid_set_y)
+test_set_y = get_shared_int(test_set_y)
+
 network.trainSGDSupervised(train_x_label, train_y_label, valid_set_x, valid_set_y, test_set_x, test_set_y)
 
 

@@ -60,6 +60,13 @@ def get_shared_int(y, borrow=True):
 	return T.cast(y_shared, 'int32')
 
 
+def shared_dataset(data_xy, borrow=True):
+	data_x, data_y = data_xy
+	shared_x = theano.shared(np.asarray(data_x, dtype=np.float32), borrow=borrow)
+	shared_y = theano.shared(np.asarray(data_y, dtype=np.float32), borrow=borrow)
+	return shared_x, T.cast(shared_y, 'int32')
+
+
 # def init_shared_weight(inp_dims, out_dims):
 # 	numpy_rng = 
 # 	w = theano.shared(
