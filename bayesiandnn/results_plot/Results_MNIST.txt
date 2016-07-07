@@ -1,0 +1,29 @@
+Format: <validation-set-accuracy>, <test-set accuracy>
+
+Total Frames in full training set:50000
+Total frames in validation:10000
+Total frames in test set:10000
+
+	
+# Labels	NN						 SSEAE	
+100		75.8, 74.04		     			77.6, 76.2
+		(100hu)					(2000hu), alpha=50, lr=0.008
+					
+
+500 		87.01, 86.39					89.21, 88.1
+		(100hu)					(2000 hu),alpha= 300, lr=0.02		
+		
+
+600		87.56, 86.64					89.53, 89.35
+		(100hu)					(2000hu), alpha=300, lr=0.02
+
+1000		89.47, 89.14					91.43, 91.07
+		(200hu)					(2000hu layer), alpha=600, lr=0.03
+
+
+3000 		92.61, 92.41					94.42, 94.03
+		(200hu)					(2000hu), alpha=1500, lr=0.035
+
+50000		97.46, 97.54					
+		(200hu)
+
