@@ -66,7 +66,7 @@ def bsgd(nn, data, name='sgd', lr=0.06, alpha=0.3, batch_size=300, epochs=20, pe
 
 	batch_sgd_valid = theano.function(inputs=[], outputs=[nn.calcAccuracy(x, y)], givens={x: valid_set_x, y:valid_set_y})
 
-	batch_sgd_test = theano.function(inputs=[], outputs=[nn.calcAccuracy(x, y), nn.calcAccuracyTimit(x, y), nn.calcAccuracyTimitMono39(x, y)], givens={x: test_set_x, y:test_set_y})
+	batch_sgd_test = theano.function(inputs=[], outputs=[nn.calcAccuracy(x, y)], givens={x: test_set_x, y:test_set_y})
 
 	indices = np.arange(num_samples,  dtype=np.dtype('int32'))
 	np.random.shuffle(indices)
@@ -112,7 +112,7 @@ def bsgd(nn, data, name='sgd', lr=0.06, alpha=0.3, batch_size=300, epochs=20, pe
 		LR.updateRate()
 
 	test_accuracy = batch_sgd_test()
-	print test_accuracy[0], test_accuracy[1], test_accuracy[2]
+	print test_accuracy[0]
 
 
 

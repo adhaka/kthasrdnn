@@ -168,8 +168,8 @@ def map_y_39(y):
         y_39[y_39 == 16] = 37
         y_39[y_39 == 9] = 37
 
-        print min(y_39), max(y_39)
-        print min(y_48), max(y_48)
+        # print min(y_39), max(y_39)
+        # print min(y_48), max(y_48)
         phoneme_count = Counter(y_39)
         ph = phoneme_count.keys()
         ph.sort()
@@ -179,7 +179,7 @@ def map_y_39(y):
         for x,y in p_map:
                 y_39[y_39 == x] = y
 
-        print min(y_39), max(y_39)
+        # print min(y_39), max(y_39)
         y_39 = y_39.tolist()
         return y_39
 
@@ -191,7 +191,7 @@ def partition_data(x, y, percent_data, max_partitions=1):
 		x = xmat
 		y = ymat
 
-	num_samples = xmat.shape[0]
+	num_samples = x.shape[0]
 	num_labels = int(percent_data * num_samples)
 	print "number of frames used in training:", num_labels
 	# x_lab	

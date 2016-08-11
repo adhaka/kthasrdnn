@@ -12,8 +12,9 @@ from theano.tensor.shared_randomstreams import RandomStreams
 import math
 from utils.utils import one_of_K_encoding
 from utils.utils import get_shared, get_shared_int, shared_dataset
-from neuralnetwork.SSDAE import SSDAE
+from neuralnetwork.SSDAE1 import SSDAE
 from datasets import mnist
+import argparse
 
 
 
@@ -36,7 +37,7 @@ parser.add_argument('--percent', '-p', type=float, default=0.999)
 parser.add_argument('--beta', '-b', type=int, default=200)
 parser.add_argument('--alpha', '-a', type=int, default=3)
 
-args == parser.parse_args()
+args = parser.parse_args()
 alpha = args.alpha
 beta = args.beta
 percent = args.percent
