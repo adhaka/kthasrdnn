@@ -197,7 +197,13 @@ class SSDAE(object):
 				# print "wc  we    out    wd:", np.mean(wc_np.flatten()),  np.mean(wt_np.flatten()), np.mean(out[100,:]), np.mean(wd_np[100,:])
 				print "epoch is:", epoch 
 				print "cost is: %d, %d, %d", np.nanmean(c), np.nanmean(c1), np.nanmean(c2) , np.mean(c3)
+			
+		x_lab_shared.set_value([[]])
+		x_unlab_shared.set_value([[]])
+		#y_lab_shared.set_value([[]])
+		
 				# oldWe = wt_np
+
 				# oldWc = la.getWc()
 				# la.update_Wc(self.y_lab_np_1_K, preds_np, out)
 				# new_Wc = la.getWc()
@@ -208,10 +214,13 @@ class SSDAE(object):
 
 
 
-	def trainSGDSupervised(self, train_set_x, train_set_y, valid_set_x, valid_set_y, test_set_x, test_set_y):
+	def trainSGDSupervised(self, train_set_x, train_set_y, valid_set_x, valid_set_y):
 		# dnn = DNN(self.numpy_rng, [self.hidden_layers[-1]], self.hidden_layers[-1], 10, w_layers=[self.layers[0].encoder.get_weight()], b_layers=[self.layers[0].encoder.get_bias()])
-		dnn = DNN(self.numpy_rng, [self.hidden_layers[0]], self.hidden_layers[0], 10, w_layers=[self.layers[0].encoder.get_weight()], b_layers=[self.layers[0].encoder.get_bias()])
-		# mnist_data = mnist.load_mnist_theano('mnist.pkl.gz')
+		del self.x_lab_np
+		del self.x_unlab_np
+		del self.y_lab_np
+		#dnn = DNN(self.numpy_rng, [self.hidden_layers[0]], self.hidden_layers[0], 10, w_layers=[self.layers[0].encoder.get_weight()], b_layers=[self.layers[0].encoder.get_bias()])
+		mnist_data = mnist.load_mnist_theano('mnist.pkl.gz')
 		# Hl = HiddenLayer(self.numpy_rng, self.input_size, self.hidden_layers[0], init_w=self.layers[0].get_weight(), init_b=self.layers[0].get_bias(), activation='tanh')
 		# mnist_data = mnist.load_mnist_numpy('mnist.pkl.gz')
 		print "............... Final training starts now ........."
@@ -222,6 +231,7 @@ class SSDAE(object):
 		# test_set_x, test_set_y = mnist_data[2]
 
 		# train_set_x, train_set_y = train_set_x[:600,:], train_set_y[:600]
+
 		batch_size = 300
 		epochs = 140
 
@@ -229,7 +239,7 @@ class SSDAE(object):
 		y_final = T.ivector('y_final')
 		y_eval = T.ivector('y_eval')
 
-		bsgd(dnn, mnist_data, epochs=25, lr=0.008)
+		# bsgd(dnn, mnist_data, epochs=25, lr=0.008)
 
 		print train_set_x.shape, self.layers[0].get_weight().shape
 		z1_np = np.tanh(np.dot(train_set_x, self.layers[0].get_weight()) + self.layers[0].get_bias())
@@ -238,8 +248,8 @@ class SSDAE(object):
 		z1_valid_np = np.tanh(np.dot(valid_set_x, self.layers[0].get_weight()) + self.layers[0].get_bias())
 		z2_valid_np = np.tanh(np.dot(z1_valid_np, self.layers[1].get_weight()) + self.layers[1].get_bias())
 		# z3_valid_np = np.tanh(np.dot(z2_valid_np, self.layers[2].get_weight()) + self.layers[2].get_bias())
-		z1_test_np = np.tanh(np.dot(test_set_x, self.layers[0].get_weight()) + self.layers[0].get_bias())
-		z2_test_np = np.tanh(np.dot(z1_test_np, self.layers[1].get_weight()) + self.layers[1].get_bias())
+		# z1_test_np = np.tanh(np.dot(test_set_x, self.layers[0].get_weight()) + self.layers[0].get_bias())
+		# z2_test_np = np.tanh(np.dot(z1_test_np, self.layers[1].get_weight()) + self.layers[1].get_bias())
 		# z3_test_np = np.tanh(np.dot(z2_test_np, self.layers[2].get_weight()) + self.layers[2].get_bias())
 
 
@@ -261,11 +271,11 @@ class SSDAE(object):
 		train_set_z_shared = get_shared(z1_np)
 		valid_set_x_shared = get_shared(valid_set_x)
 		valid_set_z_shared = get_shared(z1_valid_np)
-		test_set_x_shared = get_shared(test_set_x)
-		test_set_z_shared = get_shared(z1_test_np)
+		# test_set_x_shared = get_shared(test_set_x)
+		# test_set_z_shared = get_shared(z1_test_np)
 		train_set_y_shared = get_shared_int(train_set_y)
 		valid_set_y_shared = get_shared_int(valid_set_y)
-		test_set_y_shared = get_shared_int(test_set_y)
+		# test_set_y_shared = get_shared_int(test_set_y)
 
 
 		num_samples = train_set_x.shape[0] 
@@ -293,7 +303,7 @@ class SSDAE(object):
 		batch_sgd_train_final = theano.function(inputs=[index], outputs=[supervised_cost, supervised_accuracy], updates=updates, givens={x_final: train_set_z_shared[index], y_final:train_set_y_shared[index]})
 
 		batch_sgd_valid_final = theano.function(inputs=[], outputs=[self.logLayer.calcAccuracy(x_final, y_final)], givens={x_final: valid_set_z_shared, y_final:valid_set_y_shared})
-		batch_sgd_test_final = theano.function(inputs=[], outputs=[self.logLayer.calcAccuracy(x_final, y_final)], givens={x_final: test_set_z_shared, y_final:test_set_y_shared})
+		# batch_sgd_test_final = theano.function(inputs=[], outputs=[self.logLayer.calcAccuracy(x_final, y_final)], givens={x_final: test_set_z_shared, y_final:test_set_y_shared})
 		train_accuracy = []
 
 		for n in xrange(epochs):
@@ -306,7 +316,7 @@ class SSDAE(object):
 			print "epoch:", n,  " validation accuracy:",  batch_sgd_valid_final()
 			# self.finalLogLayer = LogisticRegression(n_inputs=self.hidden_layers[-1], n_outputs=self.n_outputs, activation='tanh', init_zero=True)
 
-		print "test accuracy:", batch_sgd_test_final()
+		# print "test accuracy:", batch_sgd_test_final()
 
 
 
@@ -316,7 +326,7 @@ class SSDAELayer(object):
 
 	# class variable to keep track of layers created 
 	__layer_nums = count(0)
-	def __init__(self, numpy_rng, theano_rng, n_inputs, n_outputs, n_targets, x_lab=None, x_unlab=None, y_lab=None, learning_rate = 0.020, corruption=0.20, batch_size=400, alpha=700, beta=3, tied=False, activation='tanh'):
+	def __init__(self, numpy_rng, theano_rng, n_inputs, n_outputs, n_targets, x_lab=None, x_unlab=None, y_lab=None, learning_rate = 0.0013, corruption=0.20, batch_size=400, alpha=700, beta=3, tied=False, activation='tanh'):
 		self.numpy_rng = numpy_rng
 		self.theano_rng = theano_rng
 		self.n_inputs = n_inputs

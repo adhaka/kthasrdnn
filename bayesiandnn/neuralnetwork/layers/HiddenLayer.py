@@ -93,6 +93,12 @@ class HiddenLayer(object):
 		self.b.set_value(b_np)
 
 
+	def save_params(self, filename):
+		np.save(filename, self.get_params())
+
+	def load_params(self, filename):
+		np.load()
+
 
 
 

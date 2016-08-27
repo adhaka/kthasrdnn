@@ -67,6 +67,7 @@ class DNN(object):
 				self.delta_params = self.delta_params + HL.delta_params 
 
 		self.params += self.opLayer.params
+		self.logLayerParams = self.opLayer.params
 		self.delta_params = self.delta_params + self.opLayer.delta_params
 
 
