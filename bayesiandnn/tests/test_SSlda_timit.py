@@ -43,6 +43,11 @@ train_x_lab, train_y_lab, train_x_unlab = timit.readTIMITSSL('timit-mono-mfcc-tr
 valid_x, valid_y = timit.readTIMIT('timit-mono-mfcc-valid.pfile.gz', shared=False, listify=False, mapping=48)
 test_x, test_y = timit.readTIMIT('timit-mono-mfcc-test.pfile.gz', shared=False, listify=False, mapping=48)
 
+num_valid_rows = valid_x.shape[0]
+num_valid_samples = int(0.06 * num_valid_rows)
+valid_x = valid_x[:num_valid_samples,:]
+valid_y = valid_y[:num_valid_samples]
+ 
 # train_y_all = reduce(lambda x,y:x+y, train_y)
 
 # train_x, train_y  = timit.make_shared_partitions(train_x, train_y)
@@ -54,6 +59,6 @@ test_x, test_y = timit.readTIMIT('timit-mono-mfcc-test.pfile.gz', shared=False, 
 # train_x_unlabel = train_y_all[30000:90000,:]
 print valid_x.shape
 
-network = SSDAE(numpy_rng, [7000, 7000], train_x_lab, train_y_lab, train_x_unlab, alpha=alpha, beta=beta)
-network.trainSGD(epochs = [70, 2])
-network.trainSGDSupervised(train_x_lab, train_y_lab, valid_x, valid_y, test_x, test_y)
+network = SSDAE(numpy_rng, [8000, 8000], train_x_lab, train_y_lab, train_x_unlab, alpha=alpha, beta=beta)
+network.trainSGD(epochs = [70, 1])
+network.trainSGDSupervised(train_x_lab, train_y_lab, valid_x, valid_y)
