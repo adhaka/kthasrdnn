@@ -5,6 +5,7 @@ from os import sys, path
 sys.path.append(path.dirname(path.dirname( path.abspath(__file__) ) ) )
 
 import numpy as np
+import argparse
 from neuralnetwork.learning.sgd import *
 from neuralnetwork.DNN import DNN
 from datasets import mnist
@@ -14,18 +15,29 @@ import theano
 import theano.tensor as T 
 from collections import OrderedDict
 from collections import Counter
+import argparse
 
 
 numpy_rng = np.random.RandomState(1111)
 theano_rng = RandomStreams(numpy_rng.randint( 2**30 ))
 
+
+parser = argparse.ArgumentParser(description='setting up hyperparams by command line.')
+parser.add_argument('--percent', '-p', type=float, default=0.9999)
+parser.add_argument('--units', '-u', type=int, default=1000)
+
+args = parser.parse_args()
+percent = args.percent
+hu = args.units
+
+
 # neural network for monophones 
 # nn = DNN(numpy_rng, [6096, 6096], 429, 144)
-nn = DNN(numpy_rng, [2000,], 429, 48)
+nn = DNN(numpy_rng, [hu,], 429, 48)
 #nn = DNN(numpy_rng, [10096], 1320, 48)
 MODE = 'usevalid'
 
-train_x, train_y = timit.readTIMIT('timit-mono-mfcc-train.pfile.gz', shared=False, listify=True, mapping=48, percent_data=0.999, randomise=True)
+train_x, train_y = timit.readTIMIT('timit-mono-mfcc-train.pfile.gz', shared=False, listify=True, mapping=48, percent_data=percent, randomise=True)
 valid_x, valid_y = timit.readTIMIT('timit-mono-mfcc-valid.pfile.gz', shared=False, listify=False, mapping=48)
 test_x, test_y = timit.readTIMIT('timit-mono-mfcc-test.pfile.gz', shared=False, listify=False, mapping=48)
 
@@ -71,7 +83,6 @@ else:
 	valid_x, valid_y = timit.shared_dataset(valid_xy)
 	test_x, test_y = timit.shared_dataset(test_xy)
 	num_rows = train_x_mat.shape[0]
-	# print train_x_mat[1000,:]
 
 	# split the train_x_mat into three equal parts
 	train_x_list = []

@@ -49,16 +49,13 @@ valid_x = valid_x[:num_valid_samples,:]
 valid_y = valid_y[:num_valid_samples]
  
 # train_y_all = reduce(lambda x,y:x+y, train_y)
+valid_x, valid_y = timit.readTIMIT('timit-mono-mfcc-valid.pfile.gz', shared=False, listify=False, mapping=48, percent_data=0.20, randomise=True)
+# test_x, test_y = timit.readTIMIT('timit-mono-mfcc-test.pfile.gz', shared=False, listify=False, mapping=48)
 
 # train_x, train_y  = timit.make_shared_partitions(train_x, train_y)
-# train_set_x = train_x[0]
-# print train_x_all.get_value().shape[0]
-
-# train_x_label = train_x_all[:30000, :]
-# train_y_label = train_x_all[:30000, :]
-# train_x_unlabel = train_y_all[30000:90000,:]
-print valid_x.shape
+# print valid_x.shape
 
 network = SSDAE(numpy_rng, [8000, 8000], train_x_lab, train_y_lab, train_x_unlab, alpha=alpha, beta=beta)
 network.trainSGD(epochs = [70, 1])
 network.trainSGDSupervised(train_x_lab, train_y_lab, valid_x, valid_y)
+
