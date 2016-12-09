@@ -1,0 +1,473 @@
+percent data:0.03
+number of partitions:
+(56005, 429)
+value of alpha is: 2
+value of beta is: 100
+value of alpha is: 2
+value of beta is: 100
+number of labelled samples is: 48096
+number of unlabelled samples is: 1020720
+............ Pretrainining ...............
+epoch is: 0
+cost is: %d, %d, %d 14092.1 13960.5 65.8312 0.42620020429
+epoch is: 1
+cost is: %d, %d, %d 14007.8 13900.0 53.8688 0.448746595165
+epoch is: 2
+cost is: %d, %d, %d 13965.7 13868.7 48.4719 0.462270173647
+epoch is: 3
+cost is: %d, %d, %d 13938.2 13847.9 45.1457 0.47262299966
+epoch is: 4
+cost is: %d, %d, %d 13917.5 13832.3 42.571 0.48208205652
+epoch is: 5
+cost is: %d, %d, %d 13901.0 13820.0 40.5203 0.490313954148
+epoch is: 6
+cost is: %d, %d, %d 13887.5 13809.8 38.8532 0.497671336154
+epoch is: 7
+cost is: %d, %d, %d 13876.0 13801.2 37.4073 0.50472952843
+epoch is: 8
+cost is: %d, %d, %d 13866.0 13793.7 36.1211 0.510978227973
+epoch is: 9
+cost is: %d, %d, %d 13857.1 13787.2 34.9669 0.516866700715
+epoch is: 10
+cost is: %d, %d, %d 13849.3 13781.4 33.956 0.522233958585
+epoch is: 11
+cost is: %d, %d, %d 13842.2 13776.1 33.028 0.527291879469
+epoch is: 12
+cost is: %d, %d, %d 13835.7 13771.4 32.1762 0.532100390246
+epoch is: 13
+cost is: %d, %d, %d 13829.8 13767.1 31.384 0.53693941826
+epoch is: 14
+cost is: %d, %d, %d 13824.3 13763.1 30.6277 0.541710645784
+epoch is: 15
+cost is: %d, %d, %d 13819.3 13759.5 29.9214 0.546126202332
+epoch is: 16
+cost is: %d, %d, %d 13814.6 13756.1 29.2641 0.550200034048
+epoch is: 17
+cost is: %d, %d, %d 13810.2 13753.0 28.6479 0.554073033708
+epoch is: 18
+cost is: %d, %d, %d 13806.1 13750.0 28.056 0.558028914216
+epoch is: 19
+cost is: %d, %d, %d 13802.2 13747.2 27.4895 0.561903089888
+epoch is: 20
+cost is: %d, %d, %d 13798.5 13744.6 26.951 0.565751819965
+epoch is: 21
+cost is: %d, %d, %d 13795.1 13742.1 26.4487 0.569366739406
+epoch is: 22
+cost is: %d, %d, %d 13791.7 13739.8 25.9621 0.572797775015
+epoch is: 23
+cost is: %d, %d, %d 13788.6 13737.6 25.4995 0.576270961015
+epoch is: 24
+cost is: %d, %d, %d 13785.6 13735.5 25.0552 0.579683350358
+epoch is: 25
+cost is: %d, %d, %d 13782.7 13733.5 24.622 0.583097613997
+epoch is: 26
+cost is: %d, %d, %d 13779.9 13731.6 24.2048 0.586466254303
+epoch is: 27
+cost is: %d, %d, %d 13777.3 13729.8 23.8066 0.589655838076
+epoch is: 28
+cost is: %d, %d, %d 13774.7 13728.1 23.4258 0.592759736067
+epoch is: 29
+cost is: %d, %d, %d 13772.3 13726.4 23.0572 0.595784388832
+epoch is: 30
+cost is: %d, %d, %d 13770.0 13724.8 22.6945 0.598799933002
+epoch is: 31
+cost is: %d, %d, %d 13767.7 13723.2 22.3508 0.601617695565
+epoch is: 32
+cost is: %d, %d, %d 13765.6 13721.7 22.0179 0.604503281023
+epoch is: 33
+cost is: %d, %d, %d 13763.5 13720.3 21.6976 0.607293606922
+epoch is: 34
+cost is: %d, %d, %d 13761.4 13718.9 21.3866 0.620053382947
+epoch is: 35
+cost is: %d, %d, %d 13759.5 13717.6 21.0851 0.622757372413
+epoch is: 36
+cost is: %d, %d, %d 13757.6 13716.3 20.7936 0.625308873736
+epoch is: 37
+cost is: %d, %d, %d 13755.8 13715.0 20.515 0.627811206387
+epoch is: 38
+cost is: %d, %d, %d 13754.1 13713.7 20.2431 0.620233231188
+epoch is: 39
+cost is: %d, %d, %d 13752.4 13712.5 19.9818 0.62255277494
+epoch is: 40
+cost is: %d, %d, %d 13750.8 13711.3 19.7246 0.624970415307
+epoch is: 41
+cost is: %d, %d, %d 13749.1 13710.2 19.4724 0.627434051591
+epoch is: 42
+cost is: %d, %d, %d 13747.6 13709.1 19.2241 0.629847930573
+epoch is: 43
+cost is: %d, %d, %d 13746.0 13708.0 18.9855 0.632201419197
+epoch is: 44
+cost is: %d, %d, %d 13744.5 13707.0 18.7506 0.634531173155
+epoch is: 45
+cost is: %d, %d, %d 13743.1 13706.0 18.5234 0.636789240722
+epoch is: 46
+cost is: %d, %d, %d 13741.6 13705.0 18.2978 0.639093843044
+epoch is: 47
+cost is: %d, %d, %d 13740.2 13704.0 18.0816 0.641255426456
+epoch is: 48
+cost is: %d, %d, %d 13738.8 13703.1 17.8679 0.643480349239
+epoch is: 49
+cost is: %d, %d, %d 13737.5 13702.1 17.6623 0.645614998298
+epoch is: 50
+cost is: %d, %d, %d 13736.2 13701.3 17.461 0.647688884883
+epoch is: 51
+cost is: %d, %d, %d 13734.9 13700.4 17.2658 0.649769764412
+epoch is: 52
+cost is: %d, %d, %d 13733.7 13699.5 17.0733 0.65189056668
+epoch is: 53
+cost is: %d, %d, %d 13732.4 13698.7 16.8864 0.653917845748
+epoch is: 54
+cost is: %d, %d, %d 13731.2 13697.9 16.7017 0.655954978797
+epoch is: 55
+cost is: %d, %d, %d 13730.1 13697.1 16.521 0.65799611788
+epoch is: 56
+cost is: %d, %d, %d 13728.9 13696.3 16.3426 0.660036572108
+epoch is: 57
+cost is: %d, %d, %d 13727.8 13695.5 16.1701 0.662022075658
+epoch is: 58
+cost is: %d, %d, %d 13726.7 13694.8 16.0024 0.663918272421
+epoch is: 59
+cost is: %d, %d, %d 13725.6 13694.1 15.8381 0.665821132675
+epoch is: 60
+cost is: %d, %d, %d 13724.6 13693.3 15.6766 0.667734514978
+epoch is: 61
+cost is: %d, %d, %d 13723.5 13692.6 15.5193 0.669589950794
+epoch is: 62
+cost is: %d, %d, %d 13722.5 13691.9 15.3637 0.671435799947
+epoch is: 63
+cost is: %d, %d, %d 13721.6 13691.3 15.2119 0.673241921497
+epoch is: 64
+cost is: %d, %d, %d 13720.6 13690.6 15.0642 0.67499345224
+epoch is: 65
+cost is: %d, %d, %d 13719.7 13690.0 14.9197 0.676767999195
+epoch is: 66
+cost is: %d, %d, %d 13718.7 13689.3 14.7777 0.678489574599
+epoch is: 67
+cost is: %d, %d, %d 13717.8 13688.7 14.6385 0.680209960644
+epoch is: 68
+cost is: %d, %d, %d 13716.9 13688.1 14.4995 0.681938769719
+epoch is: 69
+cost is: %d, %d, %d 13716.0 13687.5 14.3645 0.683643416508
+epoch is: 70
+cost is: %d, %d, %d 13715.2 13686.9 14.2326 0.68531802836
+epoch is: 71
+cost is: %d, %d, %d 13714.3 13686.3 14.1011 0.687042770873
+epoch is: 72
+cost is: %d, %d, %d 13713.4 13685.7 13.9721 0.688697813909
+epoch is: 73
+cost is: %d, %d, %d 13712.6 13685.1 13.847 0.690313302321
+epoch is: 74
+cost is: %d, %d, %d 13711.8 13684.6 13.7236 0.691938485983
+epoch is: 75
+cost is: %d, %d, %d 13711.0 13684.0 13.6032 0.693495981398
+epoch is: 76
+cost is: %d, %d, %d 13710.2 13683.4 13.4851 0.69504646273
+epoch is: 77
+cost is: %d, %d, %d 13709.4 13682.9 13.3696 0.696569465178
+epoch is: 78
+cost is: %d, %d, %d 13708.7 13682.3 13.2554 0.698084618766
+epoch is: 79
+cost is: %d, %d, %d 13707.9 13681.8 13.1429 0.699611636023
+epoch is: 0
+cost is: %d, %d, %d 13541.7 13512.9 13.9325 0.696080394035
+epoch is: 1
+cost is: %d, %d, %d 13377.4 13348.1 14.1848 0.693228530855
+(429, 9000)
+[[-0.25660679  1.63718832 -2.44709992 ...,  1.35108089  0.39040208
+   1.00423312]
+ [-1.38141215 -1.6164701  -0.89409083 ..., -1.11096084  1.63092053
+  -2.07715392]
+ [ 3.42116404  1.93609548  0.35967901 ..., -0.48854706  0.44701755
+  -1.00001776]
+ ..., 
+ [-0.74670655  0.30043107 -0.25672609 ...,  0.0091997  -0.28041741
+   0.28502864]
+ [ 0.27854559 -0.40788034  0.24366741 ...,  0.40242803  0.11535965
+  -0.34024677]
+ [-0.3796142  -0.16599594 -0.05130646 ..., -0.18928044 -0.22581886
+  -0.04524395]]
+50000
+............... Final training starts now .........
+(48096, 429) (429, 9000)
+epoch: 0   train accuracy 0.52
+epoch: 0  validation accuracy: [array(0.5261315953932685)]
+epoch: 1   train accuracy 0.583333333333
+epoch: 1  validation accuracy: [array(0.5519864297830551)]
+epoch: 2   train accuracy 0.66
+epoch: 2  validation accuracy: [array(0.572841710561557)]
+epoch: 3   train accuracy 0.703333333333
+epoch: 3  validation accuracy: [array(0.569324167485046)]
+epoch: 4   train accuracy 0.696666666667
+epoch: 4  validation accuracy: [array(0.5671100794571913)]
+epoch: 5   train accuracy 0.776666666667
+epoch: 5  validation accuracy: [array(0.584590661548076)]
+epoch: 6   train accuracy 0.85
+epoch: 6  validation accuracy: [array(0.5855012945272744)]
+epoch: 7   train accuracy 0.836666666667
+epoch: 7  validation accuracy: [array(0.5766627979644675)]
+epoch: 8   train accuracy 0.91
+epoch: 8  validation accuracy: [array(0.5973752343540756)]
+epoch: 9   train accuracy 0.926666666667
+epoch: 9  validation accuracy: [array(0.5883224712079279)]
+epoch: 10   train accuracy 0.913333333333
+epoch: 10  validation accuracy: [array(0.5951432907776092)]
+epoch: 11   train accuracy 0.963333333333
+epoch: 11  validation accuracy: [array(0.6007499330416927)]
+epoch: 12   train accuracy 0.966666666667
+epoch: 12  validation accuracy: [array(0.6032318542987233)]
+epoch: 13   train accuracy 0.966666666667
+epoch: 13  validation accuracy: [array(0.6050174091598964)]
+epoch: 14   train accuracy 0.976666666667
+epoch: 14  validation accuracy: [array(0.6071243638960807)]
+epoch: 15   train accuracy 0.98
+epoch: 15  validation accuracy: [array(0.6085885188822426)]
+epoch: 16   train accuracy 0.993333333333
+epoch: 16  validation accuracy: [array(0.6075707526113739)]
+epoch: 17   train accuracy 0.996666666667
+epoch: 17  validation accuracy: [array(0.6182314079100081)]
+epoch: 18   train accuracy 1.0
+epoch: 18  validation accuracy: [array(0.618963485403089)]
+epoch: 19   train accuracy 1.0
+epoch: 19  validation accuracy: [array(0.6190527631461476)]
+epoch: 20   train accuracy 1.0
+epoch: 20  validation accuracy: [array(0.6191598964378181)]
+epoch: 21   train accuracy 1.0
+epoch: 21  validation accuracy: [array(0.6198205517364521)]
+epoch: 22   train accuracy 1.0
+epoch: 22  validation accuracy: [array(0.6201955182572985)]
+epoch: 23   train accuracy 1.0
+epoch: 23  validation accuracy: [array(0.6199991072225694)]
+epoch: 24   train accuracy 1.0
+epoch: 24  validation accuracy: [array(0.6205169181323096)]
+epoch: 25   train accuracy 1.0
+epoch: 25  validation accuracy: [array(0.620427640389251)]
+epoch: 26   train accuracy 1.0
+epoch: 26  validation accuracy: [array(0.6209633068476029)]
+epoch: 27   train accuracy 1.0
+epoch: 27  validation accuracy: [array(0.6210168734934381)]
+epoch: 28   train accuracy 1.0
+epoch: 28  validation accuracy: [array(0.6211954289795554)]
+epoch: 29   train accuracy 1.0
+epoch: 29  validation accuracy: [array(0.6209990179448264)]
+epoch: 30   train accuracy 1.0
+epoch: 30  validation accuracy: [array(0.6211775734309437)]
+epoch: 31   train accuracy 1.0
+epoch: 31  validation accuracy: [array(0.6212668511740024)]
+epoch: 32   train accuracy 1.0
+epoch: 32  validation accuracy: [array(0.6212132845281671)]
+epoch: 33   train accuracy 1.0
+epoch: 33  validation accuracy: [array(0.6213918400142845)]
+epoch: 34   train accuracy 1.0
+epoch: 34  validation accuracy: [array(0.62155253995179)]
+epoch: 35   train accuracy 1.0
+epoch: 35  validation accuracy: [array(0.6216239621462369)]
+epoch: 36   train accuracy 1.0
+epoch: 36  validation accuracy: [array(0.6217668065351308)]
+epoch: 37   train accuracy 1.0
+epoch: 37  validation accuracy: [array(0.6216061065976253)]
+epoch: 38   train accuracy 1.0
+epoch: 38  validation accuracy: [array(0.6216596732434604)]
+epoch: 39   train accuracy 1.0
+epoch: 39  validation accuracy: [array(0.6217668065351308)]
+epoch: 40   train accuracy 1.0
+epoch: 40  validation accuracy: [array(0.6219096509240246)]
+epoch: 41   train accuracy 1.0
+epoch: 41  validation accuracy: [array(0.6220882064101419)]
+epoch: 42   train accuracy 1.0
+epoch: 42  validation accuracy: [array(0.6221060619587537)]
+epoch: 43   train accuracy 1.0
+epoch: 43  validation accuracy: [array(0.6221774841532006)]
+epoch: 44   train accuracy 1.0
+epoch: 44  validation accuracy: [array(0.6221060619587537)]
+epoch: 45   train accuracy 1.0
+epoch: 45  validation accuracy: [array(0.6222131952504241)]
+epoch: 46   train accuracy 1.0
+epoch: 46  validation accuracy: [array(0.6221417730559772)]
+epoch: 47   train accuracy 1.0
+epoch: 47  validation accuracy: [array(0.6222489063476475)]
+epoch: 48   train accuracy 1.0
+epoch: 48  validation accuracy: [array(0.6225345951254352)]
+epoch: 49   train accuracy 1.0
+epoch: 49  validation accuracy: [array(0.6225703062226587)]
+epoch: 50   train accuracy 1.0
+epoch: 50  validation accuracy: [array(0.6225881617712704)]
+epoch: 51   train accuracy 1.0
+epoch: 51  validation accuracy: [array(0.6226774395143291)]
+epoch: 52   train accuracy 1.0
+epoch: 52  validation accuracy: [array(0.6228559950004464)]
+epoch: 53   train accuracy 1.0
+epoch: 53  validation accuracy: [array(0.6229809838407285)]
+epoch: 54   train accuracy 1.0
+epoch: 54  validation accuracy: [array(0.623016694937952)]
+epoch: 55   train accuracy 1.0
+epoch: 55  validation accuracy: [array(0.623016694937952)]
+epoch: 56   train accuracy 1.0
+epoch: 56  validation accuracy: [array(0.6230702615837872)]
+epoch: 57   train accuracy 1.0
+epoch: 57  validation accuracy: [array(0.6230345504865637)]
+epoch: 58   train accuracy 1.0
+epoch: 58  validation accuracy: [array(0.623213105972681)]
+epoch: 59   train accuracy 1.0
+epoch: 59  validation accuracy: [array(0.6233738059101866)]
+epoch: 60   train accuracy 1.0
+epoch: 60  validation accuracy: [array(0.6233202392643514)]
+epoch: 61   train accuracy 1.0
+epoch: 61  validation accuracy: [array(0.6231773948754575)]
+epoch: 62   train accuracy 1.0
+epoch: 62  validation accuracy: [array(0.6232309615212928)]
+epoch: 63   train accuracy 1.0
+epoch: 63  validation accuracy: [array(0.6231773948754575)]
+epoch: 64   train accuracy 1.0
+epoch: 64  validation accuracy: [array(0.6231952504240693)]
+epoch: 65   train accuracy 1.0
+epoch: 65  validation accuracy: [array(0.6230345504865637)]
+epoch: 66   train accuracy 1.0
+epoch: 66  validation accuracy: [array(0.6231773948754575)]
+epoch: 67   train accuracy 1.0
+epoch: 67  validation accuracy: [array(0.6232309615212928)]
+epoch: 68   train accuracy 1.0
+epoch: 68  validation accuracy: [array(0.6231416837782341)]
+epoch: 69   train accuracy 1.0
+epoch: 69  validation accuracy: [array(0.6232488170699045)]
+epoch: 70   train accuracy 1.0
+epoch: 70  validation accuracy: [array(0.6232488170699045)]
+epoch: 71   train accuracy 1.0
+epoch: 71  validation accuracy: [array(0.623213105972681)]
+epoch: 72   train accuracy 1.0
+epoch: 72  validation accuracy: [array(0.6231952504240693)]
+epoch: 73   train accuracy 1.0
+epoch: 73  validation accuracy: [array(0.6231595393268459)]
+epoch: 74   train accuracy 1.0
+epoch: 74  validation accuracy: [array(0.6231595393268459)]
+epoch: 75   train accuracy 1.0
+epoch: 75  validation accuracy: [array(0.6232309615212928)]
+epoch: 76   train accuracy 1.0
+epoch: 76  validation accuracy: [array(0.6231238282296223)]
+epoch: 77   train accuracy 1.0
+epoch: 77  validation accuracy: [array(0.6229809838407285)]
+epoch: 78   train accuracy 1.0
+epoch: 78  validation accuracy: [array(0.6229274171948933)]
+epoch: 79   train accuracy 1.0
+epoch: 79  validation accuracy: [array(0.6228559950004464)]
+epoch: 80   train accuracy 1.0
+epoch: 80  validation accuracy: [array(0.6227667172573877)]
+epoch: 81   train accuracy 1.0
+epoch: 81  validation accuracy: [array(0.6227131506115525)]
+epoch: 82   train accuracy 1.0
+epoch: 82  validation accuracy: [array(0.6228024283546112)]
+epoch: 83   train accuracy 1.0
+epoch: 83  validation accuracy: [array(0.622748861708776)]
+epoch: 84   train accuracy 1.0
+epoch: 84  validation accuracy: [array(0.6226238728684938)]
+epoch: 85   train accuracy 1.0
+epoch: 85  validation accuracy: [array(0.6226060173198822)]
+epoch: 86   train accuracy 1.0
+epoch: 86  validation accuracy: [array(0.6224453173823766)]
+epoch: 87   train accuracy 1.0
+epoch: 87  validation accuracy: [array(0.622552450674047)]
+epoch: 88   train accuracy 1.0
+epoch: 88  validation accuracy: [array(0.6225703062226587)]
+epoch: 89   train accuracy 1.0
+epoch: 89  validation accuracy: [array(0.6225167395768235)]
+epoch: 90   train accuracy 1.0
+epoch: 90  validation accuracy: [array(0.6224274618337648)]
+epoch: 91   train accuracy 1.0
+epoch: 91  validation accuracy: [array(0.6223024729934827)]
+epoch: 92   train accuracy 1.0
+epoch: 92  validation accuracy: [array(0.6223203285420945)]
+epoch: 93   train accuracy 1.0
+epoch: 93  validation accuracy: [array(0.6222131952504241)]
+epoch: 94   train accuracy 1.0
+epoch: 94  validation accuracy: [array(0.6221596286045888)]
+epoch: 95   train accuracy 1.0
+epoch: 95  validation accuracy: [array(0.6221774841532006)]
+epoch: 96   train accuracy 1.0
+epoch: 96  validation accuracy: [array(0.6221596286045888)]
+epoch: 97   train accuracy 1.0
+epoch: 97  validation accuracy: [array(0.6221774841532006)]
+epoch: 98   train accuracy 1.0
+epoch: 98  validation accuracy: [array(0.6221060619587537)]
+epoch: 99   train accuracy 1.0
+epoch: 99  validation accuracy: [array(0.6221596286045888)]
+epoch: 100   train accuracy 1.0
+epoch: 100  validation accuracy: [array(0.6221774841532006)]
+epoch: 101   train accuracy 1.0
+epoch: 101  validation accuracy: [array(0.6222131952504241)]
+epoch: 102   train accuracy 1.0
+epoch: 102  validation accuracy: [array(0.6222310507990358)]
+epoch: 103   train accuracy 1.0
+epoch: 103  validation accuracy: [array(0.6223381840907062)]
+epoch: 104   train accuracy 1.0
+epoch: 104  validation accuracy: [array(0.6223738951879296)]
+epoch: 105   train accuracy 1.0
+epoch: 105  validation accuracy: [array(0.622284617444871)]
+epoch: 106   train accuracy 1.0
+epoch: 106  validation accuracy: [array(0.6223381840907062)]
+epoch: 107   train accuracy 1.0
+epoch: 107  validation accuracy: [array(0.6222489063476475)]
+epoch: 108   train accuracy 1.0
+epoch: 108  validation accuracy: [array(0.6223381840907062)]
+epoch: 109   train accuracy 1.0
+epoch: 109  validation accuracy: [array(0.6223738951879296)]
+epoch: 110   train accuracy 1.0
+epoch: 110  validation accuracy: [array(0.6224274618337648)]
+epoch: 111   train accuracy 1.0
+epoch: 111  validation accuracy: [array(0.6224453173823766)]
+epoch: 112   train accuracy 1.0
+epoch: 112  validation accuracy: [array(0.6224810284796001)]
+epoch: 113   train accuracy 1.0
+epoch: 113  validation accuracy: [array(0.6224453173823766)]
+epoch: 114   train accuracy 1.0
+epoch: 114  validation accuracy: [array(0.622356039639318)]
+epoch: 115   train accuracy 1.0
+epoch: 115  validation accuracy: [array(0.622284617444871)]
+epoch: 116   train accuracy 1.0
+epoch: 116  validation accuracy: [array(0.6223738951879296)]
+epoch: 117   train accuracy 1.0
+epoch: 117  validation accuracy: [array(0.6223381840907062)]
+epoch: 118   train accuracy 1.0
+epoch: 118  validation accuracy: [array(0.6223917507365414)]
+epoch: 119   train accuracy 1.0
+epoch: 119  validation accuracy: [array(0.6224274618337648)]
+epoch: 120   train accuracy 1.0
+epoch: 120  validation accuracy: [array(0.6224810284796001)]
+epoch: 121   train accuracy 1.0
+epoch: 121  validation accuracy: [array(0.6225345951254352)]
+epoch: 122   train accuracy 1.0
+epoch: 122  validation accuracy: [array(0.6225167395768235)]
+epoch: 123   train accuracy 1.0
+epoch: 123  validation accuracy: [array(0.6226595839657173)]
+epoch: 124   train accuracy 1.0
+epoch: 124  validation accuracy: [array(0.622552450674047)]
+epoch: 125   train accuracy 1.0
+epoch: 125  validation accuracy: [array(0.6225167395768235)]
+epoch: 126   train accuracy 1.0
+epoch: 126  validation accuracy: [array(0.6224631729309883)]
+epoch: 127   train accuracy 1.0
+epoch: 127  validation accuracy: [array(0.6225167395768235)]
+epoch: 128   train accuracy 1.0
+epoch: 128  validation accuracy: [array(0.6224631729309883)]
+epoch: 129   train accuracy 1.0
+epoch: 129  validation accuracy: [array(0.6224453173823766)]
+epoch: 130   train accuracy 1.0
+epoch: 130  validation accuracy: [array(0.6224096062851531)]
+epoch: 131   train accuracy 1.0
+epoch: 131  validation accuracy: [array(0.6224631729309883)]
+epoch: 132   train accuracy 1.0
+epoch: 132  validation accuracy: [array(0.6223917507365414)]
+epoch: 133   train accuracy 1.0
+epoch: 133  validation accuracy: [array(0.6224810284796001)]
+epoch: 134   train accuracy 1.0
+epoch: 134  validation accuracy: [array(0.6224096062851531)]
+epoch: 135   train accuracy 1.0
+epoch: 135  validation accuracy: [array(0.6224096062851531)]
+epoch: 136   train accuracy 1.0
+epoch: 136  validation accuracy: [array(0.6223738951879296)]
+epoch: 137   train accuracy 1.0
+epoch: 137  validation accuracy: [array(0.6223024729934827)]
+epoch: 138   train accuracy 1.0
+epoch: 138  validation accuracy: [array(0.6223203285420945)]
+epoch: 139   train accuracy 1.0
+epoch: 139  validation accuracy: [array(0.6222667618962593)]
+test accuracy: [array(0.6295548956301041)]
+
